@@ -8,6 +8,7 @@ require (
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.8.4
 	github.com/sygmaprotocol/sygma-core v0.0.0-20240213143226-6c21c763eefc
+	go.uber.org/mock v0.3.0
 )
 
 require (

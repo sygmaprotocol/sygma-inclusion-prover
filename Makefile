@@ -21,6 +21,8 @@ test:
 	./scripts/tests.sh
 
 genmocks:
+	mockgen -source=./chains/evm/listener/handlers/stateRoot.go -destination=./mock/stateRoot.go -package mock
+
 
 PLATFORMS := linux/amd64 darwin/amd64 darwin/arm64 linux/arm
 temp = $(subst /, ,$@)

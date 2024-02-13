@@ -70,7 +70,7 @@ func (h *StateRootEventHandler) fetchStateRoots(startBlock *big.Int, endBlock *b
 	for _, l := range logs {
 		sr, err := h.unpackStateRoot(l.Data)
 		if err != nil {
-			log.Error().Msgf("Failed unpacking deposit event log: %v", err)
+			log.Error().Msgf("Failed unpacking state root event log: %v", err)
 			continue
 		}
 		log.Debug().Uint8("domainID", h.domainID).Uint8("sourceDomainID", sr.SourceDomainID).Msgf(
