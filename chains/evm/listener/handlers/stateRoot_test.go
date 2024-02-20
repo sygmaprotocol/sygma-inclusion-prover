@@ -111,13 +111,18 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_ValidRoots() {
 	s.Nil(err)
 
 	expectedStateRoot, _ := hex.DecodeString("D3D6B9D842F0CD581C75D6D9D94E5DA5FA1440708386C3CA4DBA069CF5EB6ABD")
-	fmt.Println(expectedStateRoot)
 	msg, err := readFromChannel(s.msgChan)
 	s.Nil(err)
-	s.Equal(msg, []*message.Message{evmMessage.NewEvmStateRootMessage(s.sourceDomain, 1, SliceTo32Bytes(expectedStateRoot))})
+	s.Equal(msg, []*message.Message{evmMessage.NewEvmStateRootMessage(s.sourceDomain, 1, evmMessage.StateRootData{
+		StateRoot: SliceTo32Bytes(expectedStateRoot),
+		Slot:      big.NewInt(987232),
+	})})
 	msg, err = readFromChannel(s.msgChan)
 	s.Nil(err)
-	s.Equal(msg, []*message.Message{evmMessage.NewEvmStateRootMessage(s.sourceDomain, 1, SliceTo32Bytes(expectedStateRoot))})
+	s.Equal(msg, []*message.Message{evmMessage.NewEvmStateRootMessage(s.sourceDomain, 1, evmMessage.StateRootData{
+		StateRoot: SliceTo32Bytes(expectedStateRoot),
+		Slot:      big.NewInt(987232),
+	})})
 	_, err = readFromChannel(s.msgChan)
 	s.NotNil(err)
 }
