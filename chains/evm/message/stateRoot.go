@@ -10,6 +10,7 @@ import (
 
 	"github.com/attestantio/go-eth2-client/api"
 	"github.com/attestantio/go-eth2-client/spec"
+	"github.com/ethereum/go-ethereum/accounts/abi"
 	ethereumABI "github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -57,10 +58,6 @@ type StateRootHandler struct {
 	slotIndex     uint8
 
 	msgChan chan []*message.Message
-
-	// TODO
-	// latest block number for the source-destination pair
-	latestBlockNumber map[uint8]map[uint8]uint64
 }
 
 func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal, error) {
@@ -125,10 +122,17 @@ func (h *StateRootHandler) proof(
 // slotKey mimics slot key calculation from solidity
 // https://github.com/sygmaprotocol/sygma-x-solidity/blob/bd43d1138b38328267f2bfdb65a37817f24e3286/src/contracts/Executor.sol#L235
 func (h *StateRootHandler) slotKey(d *events.Deposit) string {
-	// TODO arguments pack
-	outerMap, _ := h.routerABI.Pack("", h.domainID, h.slotIndex)
+	outerArguments := abi.Arguments{
+		abi.Argument{Name: "", Type: "uint8"},
+		abi.Argument{Name: "", Type: "uint8"},
+	}
+	outerMap, _ := outerArguments.Pack("", h.domainID, h.slotIndex)
 	outerMapHash := crypto.Keccak256(outerMap)
-	innerMap, _ := h.routerABI.Pack("", d.DepositNonce, outerMapHash)
+	innterArguments := abi.Arguments{
+		abi.Argument{Name: "", Type: "uint64"},
+		abi.Argument{Name: "", Type: "bytes32"},
+	}
+	innerMap, _ := innerArguments.Pack("", d.DepositNonce, outerMapHash)
 	slotKey := crypto.Keccak256(innerMap)
 	return hex.EncodeToString(slotKey)
 }
