@@ -5,13 +5,16 @@ package message
 
 import (
 	"context"
+	"encoding/hex"
 	"math/big"
 
 	"github.com/attestantio/go-eth2-client/api"
 	"github.com/attestantio/go-eth2-client/spec"
 	ethereumABI "github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/rs/zerolog/log"
 	"github.com/sygmaprotocol/sygma-core/relayer/message"
 	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
@@ -41,6 +44,7 @@ type BlockFetcher interface {
 }
 
 type EventFetcher interface {
+	CallContext(ctx context.Context, target interface{}, rpcMethod string, args ...interface{}) error
 	FetchEventLogs(ctx context.Context, contractAddress common.Address, event string, startBlock *big.Int, endBlock *big.Int) ([]types.Log, error)
 }
 
@@ -50,6 +54,7 @@ type StateRootHandler struct {
 	routerAddress common.Address
 	routerABI     ethereumABI.ABI
 	domainID      uint8
+	slotIndex     uint8
 
 	msgChan chan []*message.Message
 
@@ -59,9 +64,12 @@ type StateRootHandler struct {
 }
 
 func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal, error) {
-	log.Debug().Uint8("domainID", m.Destination).Msgf("Received rotate message from domain %d", m.Source)
-
 	stateRoot := m.Data.(StateRootData)
+	log.Debug().Uint8(
+		"domainID", m.Destination).Str(
+		"stateRoot", hex.EncodeToString(stateRoot.StateRoot[:])
+	).Msgf("Received state root message from domain %d", m.Source)
+
 	block, err := h.blockFetcher.SignedBeaconBlock(context.Background(), &api.SignedBeaconBlockOpts{
 		Block: stateRoot.Slot.String(),
 	})
@@ -75,11 +83,54 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 	}
 	msgs := []*message.Message{}
 	for _, d := range deposits {
-		msgs = append(msgs, NewEVMDepositMessage(h.domainID, d.DestinationDomainID, d))
+		accountProof, storageProof, err := h.proof(blockNumber, d)
+		if err != nil {
+			return nil, err
+		}
+		msgs = append(msgs, NewEVMTransferMessage(h.domainID, d.DestinationDomainID, TransferData{
+			Deposit:      d,
+			Slot:         stateRoot.Slot,
+			AccountProof: accountProof,
+			StorageProof: storageProof,
+		}))
 	}
 
 	h.msgChan <- msgs
 	return nil, nil
+}
+
+func (h *StateRootHandler) proof(
+	blockNumber *big.Int,
+	deposit *events.Deposit,
+) ([]string, []string, error) {
+	type storageProof struct {
+		Proof []string `json:"proof"`
+	}
+	type accountProof struct {
+		AccountProof []string     `json:"accountProof"`
+		StorageProof storageProof `json:"storageProof"`
+	}
+	type response struct {
+		Result accountProof `json:"result"`
+	}
+	var resp response
+	err := h.eventFetcher.CallContext(context.Background(), &resp, "eth_getProof", h.routerAddress, []string{h.slotKey(deposit)}, hexutil.EncodeBig(blockNumber))
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return resp.Result.AccountProof, resp.Result.StorageProof.Proof, nil
+}
+
+// slotKey mimics slot key calculation from solidity
+// https://github.com/sygmaprotocol/sygma-x-solidity/blob/bd43d1138b38328267f2bfdb65a37817f24e3286/src/contracts/Executor.sol#L235
+func (h *StateRootHandler) slotKey(d *events.Deposit) string {
+	// TODO arguments pack
+	outerMap, _ := h.routerABI.Pack("", h.domainID, h.slotIndex)
+	outerMapHash := crypto.Keccak256(outerMap)
+	innerMap, _ := h.routerABI.Pack("", d.DepositNonce, outerMapHash)
+	slotKey := crypto.Keccak256(innerMap)
+	return hex.EncodeToString(slotKey)
 }
 
 func (h *StateRootHandler) fetchDeposits(startBlock *big.Int, endBlock *big.Int) ([]*events.Deposit, error) {

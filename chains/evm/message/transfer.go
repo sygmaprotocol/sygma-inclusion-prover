@@ -4,32 +4,41 @@
 package message
 
 import (
+	"math/big"
+
 	"github.com/sygmaprotocol/sygma-core/relayer/message"
 	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/listener/events"
 )
 
 const (
-	EVMDepositMessage  message.MessageType   = "EVMDepositMessage"
-	EVMDepositProposal proposal.ProposalType = "EVMDepositProposal"
+	EVMTransferMessage  message.MessageType   = "EVMTransferMessage"
+	EVMTransferProposal proposal.ProposalType = "EVMTransferProposal"
 )
 
-func NewEVMDepositMessage(source uint8, destination uint8, deposit *events.Deposit) *message.Message {
+type TransferData struct {
+	Deposit      *events.Deposit
+	Slot         *big.Int
+	AccountProof []string
+	StorageProof []string
+}
+
+func NewEVMTransferMessage(source uint8, destination uint8, transfer TransferData) *message.Message {
 	return &message.Message{
 		Source:      source,
 		Destination: destination,
-		Data:        deposit,
-		Type:        EVMDepositMessage,
+		Data:        transfer,
+		Type:        EVMTransferMessage,
 	}
 }
 
-type DepositHandler struct{}
+type TransferHandler struct{}
 
-func (h *DepositHandler) HandleMessage(m *message.Message) (*proposal.Proposal, error) {
+func (h *TransferHandler) HandleMessage(m *message.Message) (*proposal.Proposal, error) {
 	return &proposal.Proposal{
 		Source:      m.Source,
 		Destination: m.Destination,
-		Type:        EVMDepositProposal,
+		Type:        EVMTransferProposal,
 		Data:        m.Data,
 	}, nil
 }
