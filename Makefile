@@ -22,6 +22,8 @@ test:
 
 genmocks:
 	mockgen -source=./chains/evm/listener/handlers/stateRoot.go -destination=./mock/stateRoot.go -package mock
+	mockgen -destination=./mock/store.go -package mock github.com/sygmaprotocol/sygma-core/store KeyValueReaderWriter
+
 
 
 PLATFORMS := linux/amd64 darwin/amd64 darwin/arm64 linux/arm
