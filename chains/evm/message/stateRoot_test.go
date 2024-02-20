@@ -173,7 +173,7 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_ValidDeposits() {
 
 	expectedSlotKey := "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
 	s.mockClient.EXPECT().CallContext(context.Background(), gomock.Any(), "eth_getProof", s.routerAddress, []string{expectedSlotKey}, hexutil.EncodeBig(big.NewInt(100))).DoAndReturn(
-		// lint:ignore
+		//nolint:all
 		func(ctx context.Context, target interface{}, rpcMethod string, args ...interface{}) error {
 			type storageProof struct {
 				Proof []string `json:"proof"`
