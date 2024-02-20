@@ -207,6 +207,6 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_ValidDeposits() {
 	s.Equal(len(msgs), 2)
 	s.Equal(msgs[0].Destination, uint8(2))
 	s.Equal(msgs[1].Destination, uint8(2))
-	msgs, err = readFromChannel(s.msgChan)
+	_, err = readFromChannel(s.msgChan)
 	s.NotNil(err)
 }
