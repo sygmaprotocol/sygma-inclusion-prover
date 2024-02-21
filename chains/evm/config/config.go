@@ -19,6 +19,10 @@ type EVMConfig struct {
 	GasMultiplier         float64  `default:"1" split_words:"true"`
 	GasIncreasePercentage int64    `default:"15" split_words:"true"`
 	StateRootAddresses    []string `required:"true" split_words:"true"`
+	SlotIndex             uint8    `required:"true" split_words:"true"`
+	BlockConfirmations    int64    `default:"10" split_words:"true"`
+	BlockInterval         int64    `default:"5" split_words:"true"`
+	BlockRetryInterval    uint64   `default:"5" split_words:"true"`
 }
 
 // LoadEVMConfig loads EVM config from the environment and validates the fields
