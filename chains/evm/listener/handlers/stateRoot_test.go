@@ -17,6 +17,7 @@ import (
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/listener/events"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/listener/handlers"
 	evmMessage "github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/message"
+	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/util"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/mock"
 	"go.uber.org/mock/gomock"
 )
@@ -28,12 +29,6 @@ func readFromChannel(msgChan chan []*message.Message) ([]*message.Message, error
 	default:
 		return make([]*message.Message, 0), fmt.Errorf("no message sent")
 	}
-}
-
-func SliceTo32Bytes(in []byte) [32]byte {
-	var res [32]byte
-	copy(res[:], in)
-	return res
 }
 
 type StateRootHandlerTestSuite struct {
@@ -114,13 +109,13 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_ValidRoots() {
 	msg, err := readFromChannel(s.msgChan)
 	s.Nil(err)
 	s.Equal(msg, []*message.Message{evmMessage.NewEvmStateRootMessage(s.sourceDomain, 1, evmMessage.StateRootData{
-		StateRoot: SliceTo32Bytes(expectedStateRoot),
+		StateRoot: util.SliceTo32Bytes(expectedStateRoot),
 		Slot:      big.NewInt(987232),
 	})})
 	msg, err = readFromChannel(s.msgChan)
 	s.Nil(err)
 	s.Equal(msg, []*message.Message{evmMessage.NewEvmStateRootMessage(s.sourceDomain, 1, evmMessage.StateRootData{
-		StateRoot: SliceTo32Bytes(expectedStateRoot),
+		StateRoot: util.SliceTo32Bytes(expectedStateRoot),
 		Slot:      big.NewInt(987232),
 	})})
 	_, err = readFromChannel(s.msgChan)

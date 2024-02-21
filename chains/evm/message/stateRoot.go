@@ -6,6 +6,7 @@ package message
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"math/big"
 	"strings"
 
@@ -21,6 +22,7 @@ import (
 	"github.com/sygmaprotocol/sygma-core/relayer/proposal"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/abi"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/listener/events"
+	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/util"
 )
 
 const (
@@ -89,6 +91,8 @@ func NewStateRootHandler(
 	}
 }
 
+// HandleMessage fetches deposits for the given state root and submits a transfer message
+// with execution state proofs per transfer
 func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal, error) {
 	stateRoot := m.Data.(StateRootData)
 	log.Debug().Uint8(
@@ -127,6 +131,10 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 			AccountProof: accountProof,
 			StorageProof: storageProof,
 		}))
+	}
+	if len(msgs) == 0 {
+		log.Warn().Uint8("domainID", h.domainID).Msgf("No deposits found for block range %s-%s", startBlock, endBlock)
+		return nil, nil
 	}
 	h.msgChan <- msgs
 
@@ -167,21 +175,19 @@ func (h *StateRootHandler) proof(
 ) ([]string, []string, error) {
 	type storageProof struct {
 		Proof []string `json:"proof"`
+		Value string   `json:"value"`
 	}
 	type accountProof struct {
-		AccountProof []string     `json:"accountProof"`
-		StorageProof storageProof `json:"storageProof"`
+		AccountProof []string       `json:"accountProof"`
+		StorageProof []storageProof `json:"storageProof"`
 	}
-	type response struct {
-		Result accountProof `json:"result"`
-	}
-	var resp response
-	err := h.client.CallContext(context.Background(), &resp, "eth_getProof", h.routerAddress, []string{h.slotKey(deposit)}, hexutil.EncodeBig(blockNumber))
+	var resp accountProof
+	err := h.client.CallContext(context.Background(), &resp, "eth_getProof", h.routerAddress, []string{fmt.Sprintf("0x%s", h.slotKey(deposit))}, hexutil.EncodeBig(blockNumber))
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return resp.Result.AccountProof, resp.Result.StorageProof.Proof, nil
+	return resp.AccountProof, resp.StorageProof[0].Proof, nil
 }
 
 // slotKey mimics slot key calculation from solidity
@@ -194,13 +200,13 @@ func (h *StateRootHandler) slotKey(d *events.Deposit) string {
 		ethereumABI.Argument{Name: "", Type: u8},
 		ethereumABI.Argument{Name: "", Type: u8},
 	}
-	outerMap, _ := outerArguments.Pack("", h.domainID, h.slotIndex)
+	outerMap, _ := outerArguments.Pack(d.DestinationDomainID, h.slotIndex)
 	outerMapHash := crypto.Keccak256(outerMap)
 	innerArguments := ethereumABI.Arguments{
 		ethereumABI.Argument{Name: "", Type: u64},
 		ethereumABI.Argument{Name: "", Type: b32},
 	}
-	innerMap, _ := innerArguments.Pack("", d.DepositNonce, outerMapHash)
+	innerMap, _ := innerArguments.Pack(d.DepositNonce, util.SliceTo32Bytes(outerMapHash))
 	slotKey := crypto.Keccak256(innerMap)
 	return hex.EncodeToString(slotKey)
 }

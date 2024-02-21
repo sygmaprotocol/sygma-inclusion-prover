@@ -133,6 +133,8 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_NoDeposits() {
 	}))
 
 	s.Nil(err)
+	_, err = readFromChannel(s.msgChan)
+	s.NotNil(err)
 }
 
 func (s *StateRootHandlerTestSuite) Test_HandleEvents_ValidDeposits() {
