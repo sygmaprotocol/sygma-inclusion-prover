@@ -176,24 +176,13 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_ValidDeposits() {
 		nil,
 	)
 
-	expectedSlotKey := "c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470"
+	expectedSlotKey := "0x9fffbb9e89029b0baa965344cab51a6b05088fdd0a0df87ecf7dddfe9e4c7b74"
 	s.mockClient.EXPECT().CallContext(context.Background(), gomock.Any(), "eth_getProof", s.routerAddress, []string{expectedSlotKey}, hexutil.EncodeBig(big.NewInt(100))).DoAndReturn(
-		//nolint:all
-		func(ctx context.Context, target interface{}, rpcMethod string, args ...interface{}) error {
-			type storageProof struct {
-				Proof []string `json:"proof"`
-			}
-			type accountProof struct {
-				AccountProof []string     `json:"accountProof"`
-				StorageProof storageProof `json:"storageProof"`
-			}
-			type response struct {
-				Result accountProof `json:"result"`
-			}
-			target = &response{
-				Result: accountProof{
-					AccountProof: []string{"1"},
-					StorageProof: storageProof{
+		func(ctx context.Context, target *message.AccountProof, rpcMethod string, args ...interface{}) error {
+			*target = message.AccountProof{
+				AccountProof: []string{"1"},
+				StorageProof: []message.StorageProof{
+					{
 						Proof: []string{"2"},
 					},
 				},

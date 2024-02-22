@@ -34,6 +34,15 @@ type StateRootData struct {
 	Slot      *big.Int
 }
 
+type StorageProof struct {
+	Proof []string `json:"proof"`
+}
+
+type AccountProof struct {
+	AccountProof []string       `json:"accountProof"`
+	StorageProof []StorageProof `json:"storageProof"`
+}
+
 func NewEvmStateRootMessage(source uint8, destination uint8, stateRoot StateRootData) *message.Message {
 	return &message.Message{
 		Source:      source,
@@ -132,16 +141,18 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 			StorageProof: storageProof,
 		}))
 	}
+
+	err = h.blockStorer.StoreBlock(h.domainID, m.Source, endBlock)
+	if err != nil {
+		log.Err(err).Msgf("Failed saving latest block for %d-%d", h.domainID, m.Source)
+	}
+
 	if len(msgs) == 0 {
 		log.Warn().Uint8("domainID", h.domainID).Msgf("No deposits found for block range %s-%s", startBlock, endBlock)
 		return nil, nil
 	}
 	h.msgChan <- msgs
 
-	err = h.blockStorer.StoreBlock(h.domainID, m.Source, endBlock)
-	if err != nil {
-		log.Err(err).Msgf("Failed saving latest block for %d-%d", h.domainID, m.Source)
-	}
 	return nil, nil
 }
 
@@ -173,16 +184,14 @@ func (h *StateRootHandler) proof(
 	blockNumber *big.Int,
 	deposit *events.Deposit,
 ) ([]string, []string, error) {
-	type storageProof struct {
-		Proof []string `json:"proof"`
-		Value string   `json:"value"`
-	}
-	type accountProof struct {
-		AccountProof []string       `json:"accountProof"`
-		StorageProof []storageProof `json:"storageProof"`
-	}
-	var resp accountProof
-	err := h.client.CallContext(context.Background(), &resp, "eth_getProof", h.routerAddress, []string{fmt.Sprintf("0x%s", h.slotKey(deposit))}, hexutil.EncodeBig(blockNumber))
+	var resp AccountProof
+	err := h.client.CallContext(
+		context.Background(),
+		&resp,
+		"eth_getProof",
+		h.routerAddress,
+		[]string{fmt.Sprintf("0x%s", h.slotKey(deposit))},
+		hexutil.EncodeBig(blockNumber))
 	if err != nil {
 		return nil, nil, err
 	}
