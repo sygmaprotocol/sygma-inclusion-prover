@@ -131,7 +131,6 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 		if err != nil {
 			return nil, err
 		}
-
 		log.Debug().Uint8("domainID", h.domainID).Uint8("destination", d.DestinationDomainID).Msg("Sending transfer message")
 
 		msgs = append(msgs, NewEVMTransferMessage(h.domainID, d.DestinationDomainID, TransferData{
