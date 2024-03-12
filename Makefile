@@ -21,7 +21,7 @@ test:
 	./scripts/tests.sh
 
 test-e2e:
-	./scripts/e2e.sh
+	./scripts/e2e-test.sh
 
 genmocks:
 	mockgen -source=./chains/evm/listener/handlers/stateRoot.go -destination=./mock/stateRoot.go -package mock
