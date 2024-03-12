@@ -23,6 +23,9 @@ type EVMConfig struct {
 	BlockConfirmations    int64    `default:"10" split_words:"true"`
 	BlockInterval         int64    `default:"5" split_words:"true"`
 	BlockRetryInterval    uint64   `default:"5" split_words:"true"`
+	StartBlock            uint64   `split_words:"true" required:"true"`
+	FreshStart            bool     `default:"false" split_words:"true"`
+	Latest                bool     `default:"false" split_words:"true"`
 }
 
 // LoadEVMConfig loads EVM config from the environment and validates the fields
