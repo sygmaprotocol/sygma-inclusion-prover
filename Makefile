@@ -20,7 +20,7 @@ coverage:
 test:
 	./scripts/tests.sh
 
-test-e2e:
+e2e-test:
 	./scripts/e2e-test.sh
 
 genmocks:
