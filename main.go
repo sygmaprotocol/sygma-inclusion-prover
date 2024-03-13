@@ -122,8 +122,11 @@ func main() {
 					time.Duration(config.BlockRetryInterval)*time.Second,
 					big.NewInt(config.BlockConfirmations),
 					big.NewInt(config.BlockInterval))
+
 				messageHandler := message.NewMessageHandler()
-				messageHandler.RegisterMessageHandler(evmMessage.EVMStateRootMessage, evmMessage.NewStateRootHandler(beaconProvider, latestBlockStore, client, routerAddress, msgChan, id, config.SlotIndex))
+				messageHandler.RegisterMessageHandler(
+					evmMessage.EVMStateRootMessage,
+					evmMessage.NewStateRootHandler(beaconProvider, latestBlockStore, client, routerAddress, msgChan, id, config.SlotIndex, config.GenericResources))
 				messageHandler.RegisterMessageHandler(evmMessage.EVMTransferMessage, &evmMessage.TransferHandler{})
 
 				startBlock, err := blockStore.GetStartBlock(

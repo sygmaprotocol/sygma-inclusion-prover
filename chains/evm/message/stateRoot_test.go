@@ -68,6 +68,7 @@ func (s *StateRootHandlerTestSuite) SetupTest() {
 		s.msgChan,
 		s.sourceDomain,
 		s.slotIndex,
+		[]string{"0x0000000000000000000000000000000000000000000000000000000000000500"},
 	)
 }
 

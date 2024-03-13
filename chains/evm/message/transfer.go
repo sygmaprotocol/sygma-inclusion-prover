@@ -11,9 +11,14 @@ import (
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/listener/events"
 )
 
+type TransferType string
+
 const (
 	EVMTransferMessage  message.MessageType   = "EVMTransferMessage"
 	EVMTransferProposal proposal.ProposalType = "EVMTransferProposal"
+
+	GenericTransfer  TransferType = "genericTransfer"
+	FungibleTransfer TransferType = "fungibleTransfer"
 )
 
 type TransferData struct {
@@ -21,6 +26,7 @@ type TransferData struct {
 	Slot         *big.Int
 	AccountProof []string
 	StorageProof []string
+	Type         TransferType
 }
 
 func NewEVMTransferMessage(source uint8, destination uint8, transfer TransferData) *message.Message {
