@@ -8,12 +8,28 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/sygmaprotocol/sygma-core/observability"
+	"github.com/sygmaprotocol/sygma-inclusion-prover/config"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/health"
 )
 
 func main() {
-	go health.StartHealthEndpoint(3000)
+	cfg, err := config.LoadConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	logLevel, err := zerolog.ParseLevel(cfg.Observability.LogLevel)
+	if err != nil {
+		panic(err)
+	}
+	observability.ConfigureLogger(logLevel, os.Stdout)
+
+	log.Info().Msg("Loaded configuration")
+
+	go health.StartHealthEndpoint(cfg.Observability.HealthPort)
 
 	sysErr := make(chan os.Signal, 1)
 	signal.Notify(sysErr,

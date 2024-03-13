@@ -1,0 +1,28 @@
+# Copyright 2024 ChainSafe Systems
+# SPDX-License-Identifier: LGPL-3.0-only
+version: '3'
+
+services:
+  evm1:
+    image: ghcr.io/sygmaprotocol/sygma-x-solidity:1
+    command: ganache-cli --chainId 1338 -d --blockTime 2 --mnemonic "knee audit valve success kangaroo ranch stadium lava hill sugar lunar tennis"> /dev/null
+    ports:
+      - "8545:8545"
+  evm2:
+    image: ghcr.io/sygmaprotocol/sygma-x-solidity:2
+    command: ganache-cli --chainId 1338 -d --blockTime 2 --mnemonic "knee audit valve success kangaroo ranch stadium lava hill sugar lunar tennis"> /dev/null
+    ports:
+      - "8645:8545"
+
+  inclusion-prover:
+    container_name: inclusion-prover
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    depends_on:
+      - evm1
+      - evm2
+    restart: always
+    env_file:
+     - .env.example
+
