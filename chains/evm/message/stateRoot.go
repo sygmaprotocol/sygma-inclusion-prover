@@ -125,15 +125,16 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 	if err != nil {
 		return nil, err
 	}
-	msgs := []*message.Message{}
+	msgs := make(map[uint8][]*message.Message)
 	for _, d := range deposits {
 		accountProof, storageProof, err := h.proof(endBlock, d)
 		if err != nil {
 			return nil, err
 		}
+
 		log.Debug().Uint8("domainID", h.domainID).Uint8("destination", d.DestinationDomainID).Msg("Sending transfer message")
 
-		msgs = append(msgs, NewEVMTransferMessage(h.domainID, d.DestinationDomainID, TransferData{
+		msgs[d.DestinationDomainID] = append(msgs[d.DestinationDomainID], NewEVMTransferMessage(h.domainID, d.DestinationDomainID, TransferData{
 			Deposit:      d,
 			Slot:         stateRoot.Slot,
 			AccountProof: accountProof,
@@ -150,7 +151,9 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 		log.Warn().Uint8("domainID", h.domainID).Msgf("No deposits found for block range %s-%s", startBlock, endBlock)
 		return nil, nil
 	}
-	h.msgChan <- msgs
+	for _, msg := range msgs {
+		h.msgChan <- msg
+	}
 
 	return nil, nil
 }
