@@ -3,14 +3,25 @@
 version: '3'
 
 services:
+  beacon-stub:
+    image: ghcr.io/sygmaprotocol/beacon-api-stub
+    volumes:
+      - "./stubs:/stubs"
+    ports:
+      - 8882:8882 # STUB
+    environment:
+      - STUB_DATA=/stubs/beacon.yml
+
   evm1:
     image: ghcr.io/sygmaprotocol/sygma-x-solidity:1
-    command: ganache-cli --chainId 1338 -d --blockTime 2 --mnemonic "knee audit valve success kangaroo ranch stadium lava hill sugar lunar tennis"> /dev/null
+    container_name: evm1
+    command: "--db data/ -h 0.0.0.0 -p 8545 --wallet.mnemonic 'myth like bonus scare over problem client lizard pioneer submit female collect'"
     ports:
       - "8545:8545"
   evm2:
     image: ghcr.io/sygmaprotocol/sygma-x-solidity:2
-    command: ganache-cli --chainId 1338 -d --blockTime 2 --mnemonic "knee audit valve success kangaroo ranch stadium lava hill sugar lunar tennis"> /dev/null
+    command: "--db data/ -h 0.0.0.0 -p 8545 --wallet.mnemonic 'myth like bonus scare over problem client lizard pioneer submit female collect'"
+    container_name: evm2
     ports:
       - "8645:8545"
 

@@ -45,6 +45,7 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad_DefaultValues() {
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_BEACON_ENDPOINT", "endpoint")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_2_ROUTER", "invalid")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_STATE_ROOT_ADDRESSES", "0x1,0x2")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_SLOT_INDEX", "1")
 
 	c, err := config.LoadEVMConfig(1)
 
@@ -61,6 +62,10 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad_DefaultValues() {
 		MaxGasPrice:           500000000000,
 		BeaconEndpoint:        "endpoint",
 		StateRootAddresses:    []string{"0x1", "0x2"},
+		SlotIndex:             1,
+		BlockConfirmations:    10,
+		BlockInterval:         5,
+		BlockRetryInterval:    5,
 	})
 }
 
@@ -72,10 +77,13 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_BEACON_ENDPOINT", "endpoint")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_MAX_GAS_PRICE", "1000")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_BLOCK_INTERVAL", "10")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_BLOCK_RETRY_INTERVAL", "10")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_BLOCK_CONFIRMATIONS", "15")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_GAS_MULTIPLIER", "1")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_GAS_INCREASE_PERCENTAGE", "20")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_2_ROUTER", "invalid")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_STATE_ROOT_ADDRESSES", "0x1,0x2")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_SLOT_INDEX", "1")
 
 	c, err := config.LoadEVMConfig(1)
 
@@ -92,5 +100,9 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 		MaxGasPrice:           1000,
 		BeaconEndpoint:        "endpoint",
 		StateRootAddresses:    []string{"0x1", "0x2"},
+		SlotIndex:             1,
+		BlockConfirmations:    15,
+		BlockInterval:         10,
+		BlockRetryInterval:    10,
 	})
 }

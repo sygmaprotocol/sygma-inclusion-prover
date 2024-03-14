@@ -58,7 +58,11 @@ func (h *StateRootEventHandler) HandleEvents(startBlock *big.Int, endBlock *big.
 	}
 
 	for _, sr := range stateRoots {
-		h.msgChan <- []*message.Message{evmMessage.NewEvmStateRootMessage(h.domainID, sr.SourceDomainID, sr.StateRoot)}
+		log.Debug().Uint8("domainID", h.domainID).Msgf("Sending state root message to domain %d", sr.SourceDomainID)
+		h.msgChan <- []*message.Message{evmMessage.NewEvmStateRootMessage(h.domainID, sr.SourceDomainID, evmMessage.StateRootData{
+			StateRoot: sr.StateRoot,
+			Slot:      sr.Slot,
+		})}
 	}
 	return nil
 }
