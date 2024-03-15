@@ -16,7 +16,7 @@ import (
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/util"
 )
 
-const TRANSFER_GAS_COST = 200000
+const TRANSFER_GAS_COST = 600000
 
 type Batch struct {
 	proposals []contracts.ExecutorProposal
@@ -60,7 +60,9 @@ func (e *EVMExecutor) transfer(props []*proposal.Proposal) error {
 	batchData := props[0].Data.(message.TransferData)
 	proofBytes, _ := util.ToByteArray(batchData.AccountProof)
 	for _, batch := range batches {
-		hash, err := e.contract.ExecuteProposals(batch.proposals, proofBytes, batchData.Slot, transactor.TransactOptions{})
+		hash, err := e.contract.ExecuteProposals(batch.proposals, proofBytes, batchData.Slot, transactor.TransactOptions{
+			GasLimit: batch.gasLimit,
+		})
 		if err != nil {
 			log.Err(err).Msgf("Failed executing proposals")
 			continue
@@ -89,7 +91,7 @@ func (e *EVMExecutor) proposalBatches(props []*proposal.Proposal) ([]*Batch, err
 			continue
 		}
 
-		propGasLimit := uint64(TRANSFER_GAS_COST)
+		propGasLimit := e.proposalGas(prop)
 		currentBatch.gasLimit += propGasLimit
 		if currentBatch.gasLimit >= e.transactionMaxGas {
 			currentBatch = &Batch{
@@ -112,4 +114,14 @@ func (e *EVMExecutor) proposalBatches(props []*proposal.Proposal) ([]*Batch, err
 	}
 
 	return batches, nil
+}
+
+func (e *EVMExecutor) proposalGas(prop *proposal.Proposal) uint64 {
+	transferData := prop.Data.(message.TransferData)
+	if transferData.Type != message.GenericTransfer {
+		return TRANSFER_GAS_COST
+	}
+
+	genericFee := new(big.Int).SetBytes(transferData.Deposit.Data[:32])
+	return uint64(TRANSFER_GAS_COST) + genericFee.Uint64()
 }

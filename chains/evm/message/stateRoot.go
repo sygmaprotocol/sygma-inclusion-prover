@@ -23,6 +23,7 @@ import (
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/abi"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/listener/events"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/util"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -67,15 +68,15 @@ type Client interface {
 }
 
 type StateRootHandler struct {
-	blockFetcher  BlockFetcher
-	blockStorer   BlockStorer
-	client        Client
-	routerAddress common.Address
-	routerABI     ethereumABI.ABI
-	domainID      uint8
-	slotIndex     uint8
-
-	msgChan chan []*message.Message
+	blockFetcher     BlockFetcher
+	blockStorer      BlockStorer
+	client           Client
+	routerAddress    common.Address
+	routerABI        ethereumABI.ABI
+	domainID         uint8
+	slotIndex        uint8
+	genericResources []string
+	msgChan          chan []*message.Message
 }
 
 func NewStateRootHandler(
@@ -86,17 +87,19 @@ func NewStateRootHandler(
 	msgChan chan []*message.Message,
 	domainID uint8,
 	slotIndex uint8,
+	genericResources []string,
 ) *StateRootHandler {
 	routerABI, _ := ethereumABI.JSON(strings.NewReader(abi.RouterABI))
 	return &StateRootHandler{
-		blockFetcher:  blockFetcher,
-		blockStorer:   blockStorer,
-		client:        client,
-		routerAddress: routerAddress,
-		routerABI:     routerABI,
-		domainID:      domainID,
-		slotIndex:     slotIndex,
-		msgChan:       msgChan,
+		blockFetcher:     blockFetcher,
+		blockStorer:      blockStorer,
+		client:           client,
+		routerAddress:    routerAddress,
+		routerABI:        routerABI,
+		domainID:         domainID,
+		slotIndex:        slotIndex,
+		msgChan:          msgChan,
+		genericResources: genericResources,
 	}
 }
 
@@ -139,6 +142,7 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 			Slot:         stateRoot.Slot,
 			AccountProof: accountProof,
 			StorageProof: storageProof,
+			Type:         h.transferType(d),
 		}))
 	}
 
@@ -199,6 +203,14 @@ func (h *StateRootHandler) proof(
 	}
 
 	return resp.AccountProof, resp.StorageProof[0].Proof, nil
+}
+
+func (h *StateRootHandler) transferType(d *events.Deposit) TransferType {
+	if slices.Contains(h.genericResources, hex.EncodeToString(d.ResourceID[:])) {
+		return GenericTransfer
+	} else {
+		return FungibleTransfer
+	}
 }
 
 // slotKey mimics slot key calculation from solidity

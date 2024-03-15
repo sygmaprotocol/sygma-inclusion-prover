@@ -60,5 +60,10 @@ func (s *EVME2ETestSuite) Test_SuccessfulExecutions() {
 		s.Nil(err)
 		s.Equal(e.DepositNonce, uint64(index+1))
 		s.Equal(e.OriginDomainID, uint8(1))
+
+		tx, _, err := s.client.TransactionByHash(context.Background(), execution.TxHash)
+		s.Nil(err)
+
+		s.Equal(tx.Gas(), uint64(2100000))
 	}
 }
