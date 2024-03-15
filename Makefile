@@ -20,6 +20,9 @@ coverage:
 test:
 	./scripts/tests.sh
 
+e2e-test:
+	./scripts/e2e-test.sh
+
 genmocks:
 	mockgen -source=./chains/evm/listener/handlers/stateRoot.go -destination=./mock/stateRoot.go -package mock
 	mockgen -source=./chains/evm/message/stateRoot.go -destination=./mock/stateRootMessage.go -package mock

@@ -151,7 +151,6 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 		log.Warn().Uint8("domainID", h.domainID).Msgf("No deposits found for block range %s-%s", startBlock, endBlock)
 		return nil, nil
 	}
-
 	for _, msg := range msgs {
 		h.msgChan <- msg
 	}

@@ -29,6 +29,8 @@ import (
 	coreStore "github.com/sygmaprotocol/sygma-core/store"
 	"github.com/sygmaprotocol/sygma-core/store/lvldb"
 	evmConfig "github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/config"
+	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/contracts"
+	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/executor"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/listener/handlers"
 	evmMessage "github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/message"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/config"
@@ -123,9 +125,19 @@ func main() {
 				messageHandler := message.NewMessageHandler()
 				messageHandler.RegisterMessageHandler(evmMessage.EVMStateRootMessage, evmMessage.NewStateRootHandler(beaconProvider, latestBlockStore, client, routerAddress, msgChan, id, config.SlotIndex))
 				messageHandler.RegisterMessageHandler(evmMessage.EVMTransferMessage, &evmMessage.TransferHandler{})
-				// TODO: beaconProvider
 
-				chain := evm.NewEVMChain(listener, messageHandler, nil, id, big.NewInt(0))
+				startBlock, err := blockStore.GetStartBlock(
+					id,
+					new(big.Int).SetUint64(config.StartBlock),
+					config.Latest,
+					config.FreshStart,
+				)
+				if err != nil {
+					panic(err)
+				}
+
+				evmExecutor := executor.NewEVMExecutor(id, contracts.NewExecutorContract(common.HexToAddress(config.Executor), client, t))
+				chain := evm.NewEVMChain(listener, messageHandler, evmExecutor, id, startBlock)
 				chains[id] = chain
 			}
 		default:

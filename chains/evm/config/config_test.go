@@ -46,6 +46,7 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad_DefaultValues() {
 	os.Setenv("INCLUSION_PROVER_DOMAINS_2_ROUTER", "invalid")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_STATE_ROOT_ADDRESSES", "0x1,0x2")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_SLOT_INDEX", "1")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_START_BLOCK", "120")
 
 	c, err := config.LoadEVMConfig(1)
 
@@ -66,6 +67,9 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad_DefaultValues() {
 		BlockConfirmations:    10,
 		BlockInterval:         5,
 		BlockRetryInterval:    5,
+		Latest:                false,
+		FreshStart:            false,
+		StartBlock:            120,
 	})
 }
 
@@ -84,6 +88,9 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 	os.Setenv("INCLUSION_PROVER_DOMAINS_2_ROUTER", "invalid")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_STATE_ROOT_ADDRESSES", "0x1,0x2")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_SLOT_INDEX", "1")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_START_BLOCK", "120")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_FRESH_START", "true")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_LATEST", "true")
 
 	c, err := config.LoadEVMConfig(1)
 
@@ -104,5 +111,8 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 		BlockConfirmations:    15,
 		BlockInterval:         10,
 		BlockRetryInterval:    10,
+		Latest:                true,
+		FreshStart:            true,
+		StartBlock:            120,
 	})
 }
