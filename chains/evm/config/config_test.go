@@ -70,6 +70,7 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad_DefaultValues() {
 		Latest:                false,
 		FreshStart:            false,
 		StartBlock:            120,
+		GenericResources:      []string{"0000000000000000000000000000000000000000000000000000000000000005"},
 	})
 }
 
@@ -91,6 +92,7 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_START_BLOCK", "120")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_FRESH_START", "true")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_LATEST", "true")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_GENERIC_RESOURCES", "1,2")
 
 	c, err := config.LoadEVMConfig(1)
 
@@ -114,5 +116,6 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 		Latest:                true,
 		FreshStart:            true,
 		StartBlock:            120,
+		GenericResources:      []string{"1", "2"},
 	})
 }
