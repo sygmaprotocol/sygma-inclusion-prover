@@ -17,5 +17,5 @@ COPY --from=builder /inclusion-prover ./
 RUN chmod +x ./inclusion-prover
 RUN mkdir -p /mount
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-
+LABEL org.opencontainers.image.source https://github.com/sygmaprotocol/sygma-inclusion-prover
 ENTRYPOINT ["./inclusion-prover"]
