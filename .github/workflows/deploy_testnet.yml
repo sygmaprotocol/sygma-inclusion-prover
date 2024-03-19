@@ -7,6 +7,9 @@ on:
   push:
     branches:
       - workflow
+  release:
+    types:
+      - published
       
 env:
   ENVIRONMENT: 'TESTNET'
@@ -46,6 +49,15 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.TAG }}
 
+      - name: slack notify
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,job,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
+
           ######################## region 1 ########################
   deploy:
     needs: push
@@ -57,9 +69,6 @@ jobs:
       id-token: write
 
     steps:
-      - name: checkout the source code
-        uses: actions/checkout@v3
-
       - name: checkout ecs repo
         uses: actions/checkout@v3
         with:
@@ -91,3 +100,12 @@ jobs:
           service: 'inclusion-prover-service-${{ env.ENVIRONMENT }}'
           cluster: 'relayer-${{ env.ENVIRONMENT }}'
           wait-for-service-stability: true
+
+      - name: slack notify
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,commit,author,action,job,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
