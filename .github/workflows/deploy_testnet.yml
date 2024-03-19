@@ -4,9 +4,6 @@
 name: Sygma Inckusion Prover
 
 on:
-  push:
-    branches:
-      - workflow
   release:
     types:
       - published
