@@ -26,7 +26,7 @@ type EVMConfig struct {
 	StartBlock            uint64   `split_words:"true" required:"true"`
 	FreshStart            bool     `default:"false" split_words:"true"`
 	Latest                bool     `default:"false" split_words:"true"`
-	GenericResources      []string `default:"0000000000000000000000000000000000000000000000000000000000000005" split_words:"true"`
+	GenericResources      []string `default:"0000000000000000000000000000000000000000000000000000000000000500" split_words:"true"`
 }
 
 // LoadEVMConfig loads EVM config from the environment and validates the fields

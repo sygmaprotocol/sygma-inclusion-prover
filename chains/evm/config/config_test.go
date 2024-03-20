@@ -70,7 +70,7 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad_DefaultValues() {
 		Latest:                false,
 		FreshStart:            false,
 		StartBlock:            120,
-		GenericResources:      []string{"0000000000000000000000000000000000000000000000000000000000000005"},
+		GenericResources:      []string{"0000000000000000000000000000000000000000000000000000000000000500"},
 	})
 }
 
