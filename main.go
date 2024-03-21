@@ -123,12 +123,6 @@ func main() {
 					big.NewInt(config.BlockConfirmations),
 					big.NewInt(config.BlockInterval))
 
-				messageHandler := message.NewMessageHandler()
-				messageHandler.RegisterMessageHandler(
-					evmMessage.EVMStateRootMessage,
-					evmMessage.NewStateRootHandler(beaconProvider, latestBlockStore, client, routerAddress, msgChan, id, config.SlotIndex, config.GenericResources))
-				messageHandler.RegisterMessageHandler(evmMessage.EVMTransferMessage, &evmMessage.TransferHandler{})
-
 				startBlock, err := blockStore.GetStartBlock(
 					id,
 					new(big.Int).SetUint64(config.StartBlock),
@@ -138,6 +132,12 @@ func main() {
 				if err != nil {
 					panic(err)
 				}
+
+				messageHandler := message.NewMessageHandler()
+				messageHandler.RegisterMessageHandler(
+					evmMessage.EVMStateRootMessage,
+					evmMessage.NewStateRootHandler(beaconProvider, latestBlockStore, client, routerAddress, msgChan, id, config.SlotIndex, config.GenericResources, startBlock))
+				messageHandler.RegisterMessageHandler(evmMessage.EVMTransferMessage, &evmMessage.TransferHandler{})
 
 				evmExecutor := executor.NewEVMExecutor(id, contracts.NewExecutorContract(common.HexToAddress(config.Executor), client, t))
 				chain := evm.NewEVMChain(listener, messageHandler, evmExecutor, id, startBlock)

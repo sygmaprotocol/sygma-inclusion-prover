@@ -69,6 +69,7 @@ func (s *StateRootHandlerTestSuite) SetupTest() {
 		s.sourceDomain,
 		s.slotIndex,
 		[]string{"0x0000000000000000000000000000000000000000000000000000000000000500"},
+		big.NewInt(50),
 	)
 }
 
@@ -128,6 +129,35 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_NoDeposits() {
 	s.mockBlockStorer.EXPECT().LatestBlock(s.sourceDomain, uint8(2)).Return(big.NewInt(80), nil)
 	s.mockBlockStorer.EXPECT().StoreBlock(s.sourceDomain, uint8(2), big.NewInt(100)).Return(nil)
 	s.mockClient.EXPECT().FetchEventLogs(context.Background(), s.routerAddress, string(events.DepositSig), big.NewInt(80), big.NewInt(100))
+
+	_, err := s.stateRootHandler.HandleMessage(message.NewEvmStateRootMessage(2, s.sourceDomain, message.StateRootData{
+		Slot: big.NewInt(10),
+	}))
+
+	s.Nil(err)
+	_, err = readFromChannel(s.msgChan)
+	s.NotNil(err)
+}
+
+func (s *StateRootHandlerTestSuite) Test_HandleEvents_ZeroStartBlock() {
+	s.mockBlockFetcher.EXPECT().SignedBeaconBlock(context.Background(), &api.SignedBeaconBlockOpts{
+		Block: "10",
+	}).Return(&api.Response[*spec.VersionedSignedBeaconBlock]{
+		Data: &spec.VersionedSignedBeaconBlock{
+			Deneb: &deneb.SignedBeaconBlock{
+				Message: &deneb.BeaconBlock{
+					Body: &deneb.BeaconBlockBody{
+						ExecutionPayload: &deneb.ExecutionPayload{
+							BlockNumber: 100,
+						},
+					},
+				},
+			},
+		},
+	}, nil)
+	s.mockBlockStorer.EXPECT().LatestBlock(s.sourceDomain, uint8(2)).Return(big.NewInt(0), nil)
+	s.mockBlockStorer.EXPECT().StoreBlock(s.sourceDomain, uint8(2), big.NewInt(100)).Return(nil)
+	s.mockClient.EXPECT().FetchEventLogs(context.Background(), s.routerAddress, string(events.DepositSig), big.NewInt(50), big.NewInt(100))
 
 	_, err := s.stateRootHandler.HandleMessage(message.NewEvmStateRootMessage(2, s.sourceDomain, message.StateRootData{
 		Slot: big.NewInt(10),
