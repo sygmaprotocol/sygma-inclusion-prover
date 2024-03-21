@@ -133,7 +133,6 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 	}
 	msgs := make(map[uint8][]*message.Message)
 	for _, d := range deposits {
-		fmt.Println(endBlock)
 		accountProof, storageProof, err := h.proof(endBlock, d)
 		if err != nil {
 			return nil, err
