@@ -136,7 +136,7 @@ func main() {
 				messageHandler := message.NewMessageHandler()
 				messageHandler.RegisterMessageHandler(
 					evmMessage.EVMStateRootMessage,
-					evmMessage.NewStateRootHandler(beaconProvider, latestBlockStore, client, routerAddress, msgChan, id, config.SlotIndex, config.GenericResources, startBlock))
+					evmMessage.NewStateRootHandler(beaconProvider, latestBlockStore, client, routerAddress, msgChan, id, config.SlotIndex, config.GenericResources, new(big.Int).Set(startBlock)))
 				messageHandler.RegisterMessageHandler(evmMessage.EVMTransferMessage, &evmMessage.TransferHandler{})
 
 				evmExecutor := executor.NewEVMExecutor(id, contracts.NewExecutorContract(common.HexToAddress(config.Executor), client, t))
