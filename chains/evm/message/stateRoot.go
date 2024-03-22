@@ -77,6 +77,7 @@ type StateRootHandler struct {
 	slotIndex        uint8
 	genericResources []string
 	msgChan          chan []*message.Message
+	startBlock       *big.Int
 }
 
 func NewStateRootHandler(
@@ -88,6 +89,7 @@ func NewStateRootHandler(
 	domainID uint8,
 	slotIndex uint8,
 	genericResources []string,
+	startBlock *big.Int,
 ) *StateRootHandler {
 	routerABI, _ := ethereumABI.JSON(strings.NewReader(abi.RouterABI))
 	return &StateRootHandler{
@@ -100,6 +102,7 @@ func NewStateRootHandler(
 		slotIndex:        slotIndex,
 		msgChan:          msgChan,
 		genericResources: genericResources,
+		startBlock:       startBlock,
 	}
 }
 
@@ -163,6 +166,9 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 }
 
 func (h *StateRootHandler) fetchDeposits(destinationDomain uint8, startBlock *big.Int, endBlock *big.Int) ([]*events.Deposit, error) {
+	if startBlock.Cmp(big.NewInt(0)) == 0 {
+		startBlock = h.startBlock
+	}
 	logs, err := h.client.FetchEventLogs(context.Background(), h.routerAddress, string(events.DepositSig), startBlock, endBlock)
 	if err != nil {
 		return nil, err
