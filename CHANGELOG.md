@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/sygmaprotocol/sygma-inclusion-prover/compare/v1.0.0...v1.0.1) (2024-03-22)
+
+
+### Bug Fixes
+
+* prevent fetching history when starting prover ([#18](https://github.com/sygmaprotocol/sygma-inclusion-prover/issues/18)) ([82b1c32](https://github.com/sygmaprotocol/sygma-inclusion-prover/commit/82b1c328cb4579a6a2f75d9172c2e0b60cb1c08e))
+
 ## 1.0.0 (2024-03-20)
 
 
