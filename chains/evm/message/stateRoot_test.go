@@ -235,3 +235,88 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_ValidDeposits() {
 	_, err = readFromChannel(s.msgChan)
 	s.NotNil(err)
 }
+
+func (s *StateRootHandlerTestSuite) Test_HandleEvents_ValidDeposits_LargeBlockRange() {
+	s.mockBlockFetcher.EXPECT().SignedBeaconBlock(context.Background(), &api.SignedBeaconBlockOpts{
+		Block: "10",
+	}).Return(&api.Response[*spec.VersionedSignedBeaconBlock]{
+		Data: &spec.VersionedSignedBeaconBlock{
+			Deneb: &deneb.SignedBeaconBlock{
+				Message: &deneb.BeaconBlock{
+					Body: &deneb.BeaconBlockBody{
+						ExecutionPayload: &deneb.ExecutionPayload{
+							BlockNumber: 2432,
+						},
+					},
+				},
+			},
+		},
+	}, nil)
+	s.mockBlockStorer.EXPECT().LatestBlock(s.sourceDomain, uint8(2)).Return(big.NewInt(80), nil)
+	s.mockBlockStorer.EXPECT().StoreBlock(s.sourceDomain, uint8(2), big.NewInt(2432)).Return(nil)
+	validDepositData, _ := hex.DecodeString("000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000a00000000000000000000000000000000000000000000000000000000000000000")
+	s.mockClient.EXPECT().FetchEventLogs(context.Background(), s.routerAddress, string(events.DepositSig), big.NewInt(80), big.NewInt(1080)).Return(
+		[]types.Log{
+			{
+				Data: validDepositData,
+				Topics: []common.Hash{
+					{},
+					common.HexToHash("0xd68eb9b5E135b96c1Af165e1D8c4e2eB0E1CE4CD"),
+				},
+			},
+		},
+		nil,
+	)
+	s.mockClient.EXPECT().FetchEventLogs(context.Background(), s.routerAddress, string(events.DepositSig), big.NewInt(1081), big.NewInt(2081)).Return(
+		[]types.Log{},
+		nil,
+	)
+	s.mockClient.EXPECT().FetchEventLogs(context.Background(), s.routerAddress, string(events.DepositSig), big.NewInt(2082), big.NewInt(2432)).Return(
+		[]types.Log{
+			{
+				Data: validDepositData,
+				Topics: []common.Hash{
+					{},
+					common.HexToHash("0xd68eb9b5E135b96c1Af165e1D8c4e2eB0E1CE4CD"),
+				},
+			},
+			{
+				Data: validDepositData,
+				Topics: []common.Hash{
+					{},
+					common.HexToHash("0xd68eb9b5E135b96c1Af165e1D8c4e2eB0E1CE4CD"),
+				},
+			},
+		},
+		nil,
+	)
+
+	expectedSlotKey := "0x9fffbb9e89029b0baa965344cab51a6b05088fdd0a0df87ecf7dddfe9e4c7b74"
+	s.mockClient.EXPECT().CallContext(context.Background(), gomock.Any(), "eth_getProof", s.routerAddress, []string{expectedSlotKey}, hexutil.EncodeBig(big.NewInt(2432))).DoAndReturn(
+		func(ctx context.Context, target *message.AccountProof, rpcMethod string, args ...interface{}) error {
+			*target = message.AccountProof{
+				AccountProof: []string{"1"},
+				StorageProof: []message.StorageProof{
+					{
+						Proof: []string{"2"},
+					},
+				},
+			}
+			return nil
+		}).Times(3)
+
+	prop, err := s.stateRootHandler.HandleMessage(message.NewEvmStateRootMessage(2, s.sourceDomain, message.StateRootData{
+		Slot: big.NewInt(10),
+	}))
+
+	s.Nil(prop)
+	s.Nil(err)
+	msgs, err := readFromChannel(s.msgChan)
+	s.Nil(err)
+	s.Equal(len(msgs), 3)
+	s.Equal(msgs[0].Destination, uint8(2))
+	s.Equal(msgs[1].Destination, uint8(2))
+	s.Equal(msgs[2].Destination, uint8(2))
+	_, err = readFromChannel(s.msgChan)
+	s.NotNil(err)
+}
