@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/sygmaprotocol/sygma-inclusion-prover/compare/v1.0.1...v1.0.2) (2024-04-04)
+
+
+### Bug Fixes
+
+* prevent fetching large block range ([#21](https://github.com/sygmaprotocol/sygma-inclusion-prover/issues/21)) ([bc4db01](https://github.com/sygmaprotocol/sygma-inclusion-prover/commit/bc4db011b2363a273807c3e0e0479e1e310aacc6))
+
 ## [1.0.1](https://github.com/sygmaprotocol/sygma-inclusion-prover/compare/v1.0.0...v1.0.1) (2024-03-22)
 
 
