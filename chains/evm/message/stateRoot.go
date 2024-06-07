@@ -28,6 +28,7 @@ import (
 
 const (
 	EVMStateRootMessage message.MessageType = "EVMStateRootMessage"
+	MAX_BLOCK_RANGE     int64               = 1000
 )
 
 type StateRootData struct {
@@ -77,6 +78,7 @@ type StateRootHandler struct {
 	slotIndex        uint8
 	genericResources []string
 	msgChan          chan []*message.Message
+	startBlock       *big.Int
 }
 
 func NewStateRootHandler(
@@ -88,6 +90,7 @@ func NewStateRootHandler(
 	domainID uint8,
 	slotIndex uint8,
 	genericResources []string,
+	startBlock *big.Int,
 ) *StateRootHandler {
 	routerABI, _ := ethereumABI.JSON(strings.NewReader(abi.RouterABI))
 	return &StateRootHandler{
@@ -100,6 +103,7 @@ func NewStateRootHandler(
 		slotIndex:        slotIndex,
 		msgChan:          msgChan,
 		genericResources: genericResources,
+		startBlock:       startBlock,
 	}
 }
 
@@ -163,7 +167,10 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 }
 
 func (h *StateRootHandler) fetchDeposits(destinationDomain uint8, startBlock *big.Int, endBlock *big.Int) ([]*events.Deposit, error) {
-	logs, err := h.client.FetchEventLogs(context.Background(), h.routerAddress, string(events.DepositSig), startBlock, endBlock)
+	if startBlock.Cmp(big.NewInt(0)) == 0 {
+		startBlock = h.startBlock
+	}
+	logs, err := h.fetchLogs(startBlock, endBlock)
 	if err != nil {
 		return nil, err
 	}
@@ -184,6 +191,27 @@ func (h *StateRootHandler) fetchDeposits(destinationDomain uint8, startBlock *bi
 	}
 
 	return deposits, nil
+}
+
+// fetchLogs calls fetch event logs multiple times with a predefined block range to prevent
+// rpc errors when the block range is too large
+func (h *StateRootHandler) fetchLogs(startBlock, endBlock *big.Int) ([]types.Log, error) {
+	allLogs := make([]types.Log, 0)
+	for startBlock.Cmp(endBlock) < 0 {
+		rangeEnd := new(big.Int).Add(startBlock, big.NewInt(MAX_BLOCK_RANGE))
+		if rangeEnd.Cmp(endBlock) > 0 {
+			rangeEnd = endBlock
+		}
+
+		logs, err := h.client.FetchEventLogs(context.Background(), h.routerAddress, string(events.DepositSig), startBlock, rangeEnd)
+		if err != nil {
+			return nil, err
+		}
+		allLogs = append(allLogs, logs...)
+		startBlock = new(big.Int).Add(rangeEnd, big.NewInt(1))
+	}
+
+	return allLogs, nil
 }
 
 func (h *StateRootHandler) proof(

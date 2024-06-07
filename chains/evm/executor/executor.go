@@ -60,6 +60,10 @@ func (e *EVMExecutor) transfer(props []*proposal.Proposal) error {
 	batchData := props[0].Data.(message.TransferData)
 	proofBytes, _ := util.ToByteArray(batchData.AccountProof)
 	for _, batch := range batches {
+		if len(batch.proposals) == 0 {
+			continue
+		}
+
 		hash, err := e.contract.ExecuteProposals(batch.proposals, proofBytes, batchData.Slot, transactor.TransactOptions{
 			GasLimit: batch.gasLimit,
 		})
