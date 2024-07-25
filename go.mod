@@ -5,9 +5,7 @@ go 1.22
 require (
 	github.com/attestantio/go-eth2-client v0.19.10
 	github.com/ethereum/go-ethereum v1.13.12
-	github.com/golang/mock v1.4.4
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/mpetrun5/merkle-patricia-trie v0.0.0-20240722173008-beff5fa45c17
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.8.4
 	github.com/sygmaprotocol/sygma-core v0.0.0-20240213143226-6c21c763eefc
