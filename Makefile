@@ -5,7 +5,7 @@ all: help
 ## license: Adds license header to missing files.
 license:
 	@echo "  >  \033[32mAdding license headers...\033[0m "
-	GO111MODULE=off go get -u github.com/google/addlicense
+	go get -u github.com/google/addlicense
 	addlicense -v -c "Sygma" -f ./scripts/header.txt -y 2023 -ignore ".idea/**"  .
 
 ## license-check: Checks for missing license headers

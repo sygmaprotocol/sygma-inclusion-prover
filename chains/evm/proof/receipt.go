@@ -1,3 +1,6 @@
+// The Licensed Work is (c) 2023 Sygma
+// SPDX-License-Identifier: LGPL-3.0-only
+
 package proof
 
 import (
@@ -85,7 +88,7 @@ func (p *ReceiptProver) trie(siblings []*types.Receipt) (*trie.Trie, error) {
 				return nil, err
 			}
 		} else {
-			trie.Update(key, buffer.Bytes()[3:])
+			err = trie.Update(key, buffer.Bytes()[3:])
 			if err != nil {
 				return nil, err
 			}
