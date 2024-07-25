@@ -27,6 +27,8 @@ func NewReceiptProver(txFetcher TransactionFetcher) *ReceiptProver {
 	}
 }
 
+// ReceiptProof calculates the Ethereum receipt proof for the specified transaction hash.
+// The root hash of the proof is the block `receiptRoof` field.
 func (p *ReceiptProver) ReceiptProof(txHash common.Hash) (trienode.ProofList, error) {
 	receipt, err := p.txFetcher.TransactionReceipt(context.Background(), txHash)
 	if err != nil {
