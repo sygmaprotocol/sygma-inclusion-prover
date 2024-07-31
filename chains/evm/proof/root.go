@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	BEACON_STATE_GINDEX        = 11
-	RECEIPTS_ROOT_GINDEX       = 6435
-	BLOCK_ROOTS_GINDEX         = 37
-	SLOTS_PER_HISTORICAL_LIMIT = 8192
+	BEACON_STATE_GINDEX              = 11
+	RECEIPTS_ROOT_GINDEX             = 6435
+	BLOCK_ROOTS_GINDEX         int64 = 37
+	SLOTS_PER_HISTORICAL_LIMIT       = 8192
 )
 
 type BeaconClient interface {
@@ -103,7 +103,7 @@ func (p *ReceiptRootProver) historicalRootProof(ctx context.Context, currentSlot
 	if err != nil {
 		return nil, err
 	}
-	historicalRootProof, err := stateTree.Prove(int(concatGindices([]*big.Int{big.NewInt(BLOCK_ROOTS_GINDEX), big.NewInt(int64(rootGindex))}).Int64()))
+	historicalRootProof, err := stateTree.Prove(int(concatGindices([]int64{BLOCK_ROOTS_GINDEX, rootGindex})))
 	if err != nil {
 		return nil, err
 	}
@@ -129,20 +129,20 @@ func (p *ReceiptRootProver) receiptsRootProof(ctx context.Context, slot *big.Int
 	return receiptsRootProof.Hashes, nil
 }
 
-func calculateGindex(index *big.Int) (uint64, error) {
+func calculateGindex(index *big.Int) (int64, error) {
 	binaryIndex := strconv.FormatUint(index.Uint64(), 2)
 	gindex := "1" + binaryIndex
-	return strconv.ParseUint(gindex, 2, 64)
+	return strconv.ParseInt(gindex, 2, 64)
 }
 
-func concatGindices(gindices []*big.Int) *big.Int {
+func concatGindices(gindices []int64) int64 {
 	binaryStr := "1"
 	for _, gindex := range gindices {
-		binary := gindex.Text(2)
+		binary := big.NewInt(int64(gindex)).Text(2)
 		binaryStr += binary[1:] // Skip the leading "1" for concatenation
 	}
 
 	result := new(big.Int)
 	result.SetString(binaryStr, 2)
-	return result
+	return result.Int64()
 }
