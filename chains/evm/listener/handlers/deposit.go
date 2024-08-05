@@ -33,6 +33,8 @@ const (
 type Client interface {
 	CallContext(ctx context.Context, target interface{}, rpcMethod string, args ...interface{}) error
 	FetchEventLogs(ctx context.Context, contractAddress common.Address, event string, startBlock *big.Int, endBlock *big.Int) ([]types.Log, error)
+	BlockByHash(ctx context.Context, hash common.Hash) (*types.Block, error)
+	TransactionReceipt(ctx context.Context, txHash common.Hash) (*types.Receipt, error)
 }
 
 type StorageProof struct {

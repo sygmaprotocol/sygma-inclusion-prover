@@ -47,10 +47,15 @@ type DepositHandler interface {
 	HandleDeposits(destination uint8, startBlock *big.Int, endBlock *big.Int, slot *big.Int) error
 }
 
+type HashiHandler interface {
+	HandleMessages(destination uint8, startBlock *big.Int, endBlock *big.Int, slot *big.Int) error
+}
+
 type StateRootHandler struct {
 	blockFetcher   BlockFetcher
 	blockStorer    BlockStorer
 	depositHandler DepositHandler
+	hashiHandler   HashiHandler
 	startBlock     *big.Int
 	domainID       uint8
 }
@@ -58,6 +63,7 @@ type StateRootHandler struct {
 func NewStateRootHandler(
 	domainID uint8,
 	depositHandler DepositHandler,
+	hashiHandler HashiHandler,
 	blockFetcher BlockFetcher,
 	blockStorer BlockStorer,
 	startBlock *big.Int,
@@ -92,6 +98,11 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 		startBlock = h.startBlock
 	}
 	endBlock := big.NewInt(int64(block.Data.Deneb.Message.Body.ExecutionPayload.BlockNumber))
+
+	err = h.hashiHandler.HandleMessages(m.Source, startBlock, endBlock, stateRoot.Slot)
+	if err != nil {
+		return nil, err
+	}
 
 	err = h.depositHandler.HandleDeposits(m.Source, startBlock, endBlock, stateRoot.Slot)
 	if err != nil {

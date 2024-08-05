@@ -12,6 +12,7 @@ import (
 
 type EVMConfig struct {
 	config.BaseNetworkConfig
+	ChainID               uint64   `required:"true" split_words:"true"`
 	BeaconEndpoint        string   `required:"true" split_words:"true"`
 	Router                string   `required:"true"`
 	Executor              string   `required:"true"`
