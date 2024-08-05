@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"strings"
 
 	"github.com/attestantio/go-eth2-client/api"
 	apiv1 "github.com/attestantio/go-eth2-client/api/v1"
@@ -18,6 +19,7 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/sygmaprotocol/sygma-core/relayer/message"
+	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/abi"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/listener/events"
 	evmMessage "github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/message"
 )
@@ -56,11 +58,24 @@ type HashiEventHandler struct {
 func NewHashiEventHandler(
 	domainID uint8,
 	client Client,
+	beaconClient BeaconClient,
+	receiptProver ReceiptProver,
+	rootProver RootProver,
 	yahoAddress common.Address,
+	chainIDS map[uint8]*big.Int,
 	msgChan chan []*message.Message) *HashiEventHandler {
+	abi, _ := ethereumABI.JSON(strings.NewReader(abi.YahoABI))
 	return &HashiEventHandler{
-		log:    log.With().Uint8("domainID", domainID).Logger(),
-		client: client,
+		log:           log.With().Uint8("domainID", domainID).Logger(),
+		domainID:      domainID,
+		client:        client,
+		beaconClient:  beaconClient,
+		yahoAddress:   yahoAddress,
+		yahoABI:       abi,
+		receiptProver: receiptProver,
+		rootProver:    rootProver,
+		chainIDS:      chainIDS,
+		msgChan:       msgChan,
 	}
 }
 
