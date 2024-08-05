@@ -72,6 +72,7 @@ func NewDepositEventHandler(
 		routerABI:        routerABI,
 		slotIndex:        slotIndex,
 		genericResources: genericResources,
+		msgChan:          msgChan,
 	}
 }
 

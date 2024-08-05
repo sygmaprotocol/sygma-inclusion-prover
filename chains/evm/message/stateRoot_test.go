@@ -39,11 +39,9 @@ type StateRootHandlerTestSuite struct {
 	stateRootHandler *message.StateRootHandler
 
 	msgChan          chan []*evmMessage.Message
-	mockClient       *mock.MockClient
 	mockBlockStorer  *mock.MockBlockStorer
 	mockBlockFetcher *mock.MockBlockFetcher
 	sourceDomain     uint8
-	slotIndex        uint8
 	routerAddress    common.Address
 }
 

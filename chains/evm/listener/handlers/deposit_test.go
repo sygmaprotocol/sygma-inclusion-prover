@@ -44,7 +44,7 @@ func (s *DepositHandlerTestSuite) SetupTest() {
 	s.mockClient = mock.NewMockClient(ctrl)
 	s.mockBlockFetcher = mock.NewMockBlockFetcher(ctrl)
 	s.mockBlockStorer = mock.NewMockBlockStorer(ctrl)
-	s.msgChan = make(chan []*evmMessage.Message, 10)
+	s.msgChan = make(chan []*evmMessage.Message, 2)
 	s.sourceDomain = 1
 	s.destinationDomain = 2
 	s.slotIndex = 2
