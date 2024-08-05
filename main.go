@@ -147,7 +147,11 @@ func main() {
 				messageHandler.RegisterMessageHandler(evmMessage.EVMTransferMessage, &evmMessage.TransferHandler{})
 				messageHandler.RegisterMessageHandler(evmMessage.HashiMessage, &evmMessage.HashiMessageHandler{})
 
-				evmExecutor := executor.NewEVMExecutor(id, contracts.NewExecutorContract(common.HexToAddress(config.Executor), client, t))
+				evmExecutor := executor.NewEVMExecutor(
+					id,
+					contracts.NewExecutorContract(common.HexToAddress(config.Executor), client, t),
+					contracts.NewHashiAdapterContract(common.HexToAddress(config.Hashi), client, t),
+				)
 				chain := evm.NewEVMChain(listener, messageHandler, evmExecutor, id, startBlock)
 				chains[id] = chain
 			}

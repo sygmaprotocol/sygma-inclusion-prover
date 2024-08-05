@@ -31,9 +31,13 @@ func (s *ConfigTestSuite) Test_LoadConfig_MissingField() {
 
 func (s *ConfigTestSuite) Test_LoadConfig_DefaultValues() {
 	os.Setenv("INCLUSION_PROVER_DOMAINS", "1:evm,2:evm")
+	os.Setenv("INCLUSION_PROVER_CHAINIDS", "1:3,2:6")
 
 	c, err := config.LoadConfig()
 
+	chainIDS := make(map[uint8]uint64)
+	chainIDS[1] = 3
+	chainIDS[2] = 6
 	domains := make(map[uint8]string)
 	domains[1] = "evm"
 	domains[2] = "evm"
@@ -47,7 +51,8 @@ func (s *ConfigTestSuite) Test_LoadConfig_DefaultValues() {
 		Store: &config.Store{
 			Path: "./lvldbdata",
 		},
-		Domains: domains,
+		Domains:  domains,
+		ChainIDS: chainIDS,
 	})
 }
 
