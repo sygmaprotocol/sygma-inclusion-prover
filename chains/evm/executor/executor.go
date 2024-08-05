@@ -28,16 +28,31 @@ type ExecutorContract interface {
 	ExecuteProposals(proposals []contracts.ExecutorProposal, accountProof [][]byte, slot *big.Int, opts transactor.TransactOptions) (*common.Hash, error)
 }
 
+type HashiContract interface {
+	VerifyAndStoreDispatchedMessage(
+		srcSlot uint64,
+		txSlot uint64,
+		receiptsRootProof [][]byte,
+		receiptsRoot [32]byte,
+		receiptProof [][]byte,
+		txIndexRLPEncoded []byte,
+		logIndex *big.Int,
+		opts transactor.TransactOptions,
+	) (*common.Hash, error)
+}
+
 type EVMExecutor struct {
 	domainID          uint8
-	contract          ExecutorContract
+	executor          ExecutorContract
+	hashiAdapter      HashiContract
 	transactionMaxGas uint64
 }
 
-func NewEVMExecutor(domainID uint8, contract ExecutorContract) *EVMExecutor {
+func NewEVMExecutor(domainID uint8, executor ExecutorContract, hashiAdapter HashiContract) *EVMExecutor {
 	return &EVMExecutor{
 		domainID:          domainID,
-		contract:          contract,
+		executor:          executor,
+		hashiAdapter:      hashiAdapter,
 		transactionMaxGas: 10000000,
 	}
 }
@@ -46,9 +61,31 @@ func (e *EVMExecutor) Execute(props []*proposal.Proposal) error {
 	switch prop := props[0]; prop.Type {
 	case message.EVMTransferProposal:
 		return e.transfer(props)
+	case message.HashiProposal:
+		return e.storeMessage(props)
 	default:
 		return fmt.Errorf("no executor configured for prop type %s", prop.Type)
 	}
+}
+
+func (e *EVMExecutor) storeMessage(props []*proposal.Proposal) error {
+	data := props[0].Data.(message.HashiData)
+	hash, err := e.hashiAdapter.VerifyAndStoreDispatchedMessage(
+		data.SrcSlot.Uint64(),
+		data.TxSlot.Uint64(),
+		data.ReceiptRootProof,
+		data.ReceiptRoot,
+		data.ReceiptProof,
+		data.TxIndexRLPEncoded,
+		data.LogIndex,
+		transactor.TransactOptions{},
+	)
+	if err != nil {
+		return err
+	}
+
+	log.Info().Uint8("domainID", e.domainID).Msgf("Sent hashi message execution with hash: %s", hash)
+	return nil
 }
 
 func (e *EVMExecutor) transfer(props []*proposal.Proposal) error {
@@ -64,7 +101,7 @@ func (e *EVMExecutor) transfer(props []*proposal.Proposal) error {
 			continue
 		}
 
-		hash, err := e.contract.ExecuteProposals(batch.proposals, proofBytes, batchData.Slot, transactor.TransactOptions{
+		hash, err := e.executor.ExecuteProposals(batch.proposals, proofBytes, batchData.Slot, transactor.TransactOptions{
 			GasLimit: batch.gasLimit,
 		})
 		if err != nil {
@@ -86,7 +123,7 @@ func (e *EVMExecutor) proposalBatches(props []*proposal.Proposal) ([]*Batch, err
 	batches[0] = currentBatch
 
 	for _, prop := range props {
-		isExecuted, err := e.contract.IsProposalExecuted(prop)
+		isExecuted, err := e.executor.IsProposalExecuted(prop)
 		if err != nil {
 			return nil, err
 		}
