@@ -33,6 +33,7 @@ import (
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/executor"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/listener/handlers"
 	evmMessage "github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/message"
+	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/proof"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/config"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/health"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/metrics"
@@ -108,7 +109,6 @@ func main() {
 				}
 				beaconProvider := beaconClient.(*http.Service)
 
-				routerAddress := common.HexToAddress(config.Router)
 				eventHandlers := []listener.EventHandler{}
 				for _, stateRootAddress := range config.StateRootAddresses {
 					eventHandlers = append(eventHandlers, handlers.NewStateRootEventHandler(msgChan, client, common.HexToAddress(stateRootAddress), id))
@@ -133,11 +133,19 @@ func main() {
 					panic(err)
 				}
 
+				receiptProver := proof.NewReceiptProver(client)
+				rootProver := proof.NewReceiptRootProver(beaconProvider)
+				yahoAddress := common.HexToAddress(config.Yaho)
+				routerAddress := common.HexToAddress(config.Router)
+				hashiEventHandler := handlers.NewHashiEventHandler(id, client, beaconProvider, receiptProver, rootProver, yahoAddress, cfg.ChainIDS, msgChan)
+				depositEventHandler := handlers.NewDepositEventHandler(id, client, routerAddress, config.SlotIndex, config.GenericResources, msgChan)
+
 				messageHandler := message.NewMessageHandler()
 				messageHandler.RegisterMessageHandler(
 					evmMessage.EVMStateRootMessage,
-					evmMessage.NewStateRootHandler(beaconProvider, latestBlockStore, client, routerAddress, msgChan, id, config.SlotIndex, config.GenericResources, new(big.Int).Set(startBlock)))
+					evmMessage.NewStateRootHandler(id, depositEventHandler, hashiEventHandler, beaconProvider, latestBlockStore, startBlock))
 				messageHandler.RegisterMessageHandler(evmMessage.EVMTransferMessage, &evmMessage.TransferHandler{})
+				messageHandler.RegisterMessageHandler(evmMessage.HashiMessage, &evmMessage.HashiMessageHandler{})
 
 				evmExecutor := executor.NewEVMExecutor(id, contracts.NewExecutorContract(common.HexToAddress(config.Executor), client, t))
 				chain := evm.NewEVMChain(listener, messageHandler, evmExecutor, id, startBlock)

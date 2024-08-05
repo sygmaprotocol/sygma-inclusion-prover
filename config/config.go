@@ -11,6 +11,7 @@ type Config struct {
 	Observability *Observability   `env_config:"observability"`
 	Store         *Store           `env_config:"store"`
 	Domains       map[uint8]string `required:"true"`
+	ChainIDS      map[uint8]uint64 `required:"true"`
 }
 
 type Observability struct {

@@ -57,9 +57,13 @@ func (s *ConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 	os.Setenv("INCLUSION_PROVER_OBSERVABILITY_HEALTH_PORT", "9003")
 	os.Setenv("INCLUSION_PROVER_STORE_PATH", "./custom_path")
 	os.Setenv("INCLUSION_PROVER_DOMAINS", "1:evm,2:evm")
+	os.Setenv("INCLUSION_PROVER_CHAINIDS", "1:3,2:6")
 
 	c, err := config.LoadConfig()
 
+	chainIDS := make(map[uint8]uint64)
+	chainIDS[1] = 3
+	chainIDS[2] = 6
 	domains := make(map[uint8]string)
 	domains[1] = "evm"
 	domains[2] = "evm"
@@ -73,6 +77,7 @@ func (s *ConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 		Store: &config.Store{
 			Path: "./custom_path",
 		},
-		Domains: domains,
+		Domains:  domains,
+		ChainIDS: chainIDS,
 	})
 }

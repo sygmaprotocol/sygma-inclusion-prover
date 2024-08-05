@@ -41,6 +41,10 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad_DefaultValues() {
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_SPECTRE", "spectre")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_ROUTER", "router")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_EXECUTOR", "executor")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_YAHO", "yaho")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_HASHI", "hashi")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_CHAIN_ID", "1")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_EXECUTOR", "executor")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_STATE_ROOT_ADDRESSES", "0x1,0x2")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_BEACON_ENDPOINT", "endpoint")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_2_ROUTER", "invalid")
@@ -58,6 +62,8 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad_DefaultValues() {
 		},
 		Router:                "router",
 		Executor:              "executor",
+		Yaho:                  "yaho",
+		Hashi:                 "hashi",
 		GasMultiplier:         1,
 		GasIncreasePercentage: 15,
 		MaxGasPrice:           500000000000,
@@ -79,6 +85,8 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_KEY", "key")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_ROUTER", "router")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_EXECUTOR", "executor")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_YAHO", "yaho")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_HASHI", "hashi")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_BEACON_ENDPOINT", "endpoint")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_MAX_GAS_PRICE", "1000")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_BLOCK_INTERVAL", "10")
@@ -117,5 +125,7 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 		FreshStart:            true,
 		StartBlock:            120,
 		GenericResources:      []string{"1", "2"},
+		Yaho:                  "yaho",
+		Hashi:                 "hashi",
 	})
 }

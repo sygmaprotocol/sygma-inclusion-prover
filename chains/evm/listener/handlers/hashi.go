@@ -52,7 +52,7 @@ type HashiEventHandler struct {
 	rootProver    RootProver
 	beaconClient  BeaconClient
 	client        Client
-	chainIDS      map[uint8]*big.Int
+	chainIDS      map[uint8]uint64
 }
 
 func NewHashiEventHandler(
@@ -62,7 +62,7 @@ func NewHashiEventHandler(
 	receiptProver ReceiptProver,
 	rootProver RootProver,
 	yahoAddress common.Address,
-	chainIDS map[uint8]*big.Int,
+	chainIDS map[uint8]uint64,
 	msgChan chan []*message.Message) *HashiEventHandler {
 	abi, _ := ethereumABI.JSON(strings.NewReader(abi.YahoABI))
 	return &HashiEventHandler{
@@ -113,7 +113,7 @@ func (h *HashiEventHandler) handleMessage(l types.Log, destination uint8, slot *
 	if !ok {
 		return nil, fmt.Errorf("no chain ID for destination %d", destination)
 	}
-	if chainID.Cmp(msg.Message.TargetChainID) != 0 {
+	if new(big.Int).SetUint64(chainID).Cmp(msg.Message.TargetChainID) != 0 {
 		return nil, nil
 	}
 
