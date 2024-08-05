@@ -69,10 +69,12 @@ func NewStateRootHandler(
 	startBlock *big.Int,
 ) *StateRootHandler {
 	return &StateRootHandler{
-		blockFetcher: blockFetcher,
-		blockStorer:  blockStorer,
-		domainID:     domainID,
-		startBlock:   startBlock,
+		blockFetcher:   blockFetcher,
+		blockStorer:    blockStorer,
+		domainID:       domainID,
+		startBlock:     startBlock,
+		depositHandler: depositHandler,
+		hashiHandler:   hashiHandler,
 	}
 }
 
