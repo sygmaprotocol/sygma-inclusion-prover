@@ -143,7 +143,7 @@ func main() {
 				messageHandler := message.NewMessageHandler()
 				messageHandler.RegisterMessageHandler(
 					evmMessage.EVMStateRootMessage,
-					evmMessage.NewStateRootHandler(id, depositEventHandler, hashiEventHandler, beaconProvider, latestBlockStore, startBlock))
+					evmMessage.NewStateRootHandler(id, depositEventHandler, hashiEventHandler, beaconProvider, latestBlockStore, new(big.Int).Set(startBlock)))
 				messageHandler.RegisterMessageHandler(evmMessage.EVMTransferMessage, &evmMessage.TransferHandler{})
 				messageHandler.RegisterMessageHandler(evmMessage.HashiMessage, &evmMessage.HashiMessageHandler{})
 
