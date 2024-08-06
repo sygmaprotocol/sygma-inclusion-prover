@@ -73,6 +73,7 @@ func NewDepositEventHandler(
 		slotIndex:        slotIndex,
 		genericResources: genericResources,
 		msgChan:          msgChan,
+		domainID:         domainID,
 	}
 }
 
