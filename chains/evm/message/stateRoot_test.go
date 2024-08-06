@@ -20,15 +20,6 @@ import (
 	"go.uber.org/mock/gomock"
 )
 
-func readFromChannel(msgChan chan []*evmMessage.Message) ([]*evmMessage.Message, error) {
-	select {
-	case msgs := <-msgChan:
-		return msgs, nil
-	default:
-		return make([]*evmMessage.Message, 0), fmt.Errorf("no message sent")
-	}
-}
-
 type StateRootHandlerTestSuite struct {
 	suite.Suite
 

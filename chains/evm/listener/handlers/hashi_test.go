@@ -31,7 +31,6 @@ type HashiHandlerTestSuite struct {
 	msgChan           chan []*evmMessage.Message
 	mockClient        *mock.MockClient
 	mockBeaconClient  *mock.MockBeaconClient
-	mockBlockFetcher  *mock.MockBlockFetcher
 	mockReceiptProver *mock.MockReceiptProver
 	mockRootProver    *mock.MockRootProver
 	sourceDomain      uint8
