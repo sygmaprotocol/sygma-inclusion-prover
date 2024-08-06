@@ -101,12 +101,12 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 	}
 	endBlock := big.NewInt(int64(block.Data.Deneb.Message.Body.ExecutionPayload.BlockNumber))
 
-	err = h.hashiHandler.HandleMessages(m.Source, startBlock, endBlock, stateRoot.Slot)
+	err = h.hashiHandler.HandleMessages(m.Source, new(big.Int).Set(startBlock), new(big.Int).Set(endBlock), stateRoot.Slot)
 	if err != nil {
 		return nil, err
 	}
 
-	err = h.depositHandler.HandleDeposits(m.Source, startBlock, endBlock, stateRoot.Slot)
+	err = h.depositHandler.HandleDeposits(m.Source, new(big.Int).Set(startBlock), new(big.Int).Set(endBlock), stateRoot.Slot)
 	if err != nil {
 		return nil, err
 	}
