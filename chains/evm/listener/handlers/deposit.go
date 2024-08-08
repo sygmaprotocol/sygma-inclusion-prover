@@ -100,7 +100,7 @@ func (h *DepositEventHandler) HandleDeposits(destination uint8, startBlock *big.
 		}))
 	}
 	if len(msgs) == 0 {
-		log.Warn().Msgf("No deposits found for block range %s-%s", startBlock, endBlock)
+		log.Debug().Msgf("No deposits found for block range %s-%s", startBlock, endBlock)
 		return nil
 	}
 	for _, msg := range msgs {
