@@ -73,13 +73,13 @@ func (p *ReceiptRootProver) ReceiptsRootProof(ctx context.Context, currentSlot *
 }
 
 func (p *ReceiptRootProver) historicalRootProof(ctx context.Context, currentSlot *big.Int, targetSlot *big.Int) ([][]byte, error) {
-	beaconBlockHeader, err := p.beaconClient.BeaconBlockHeader(ctx, &api.BeaconBlockHeaderOpts{
+	beaconBlock, err := p.beaconClient.SignedBeaconBlock(ctx, &api.SignedBeaconBlockOpts{
 		Block: currentSlot.String(),
 	})
 	if err != nil {
 		return nil, err
 	}
-	headerTree, err := beaconBlockHeader.Data.Header.Message.GetTree()
+	headerTree, err := beaconBlock.Data.Deneb.Message.GetTree()
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (p *ReceiptRootProver) historicalRootProof(ctx context.Context, currentSlot
 	}
 
 	state, err := p.beaconClient.BeaconState(ctx, &api.BeaconStateOpts{
-		State: strconv.FormatUint(uint64(beaconBlockHeader.Data.Header.Message.Slot), 10),
+		State: strconv.FormatUint(currentSlot.Uint64(), 10),
 	})
 	if err != nil {
 		return nil, err
@@ -98,7 +98,6 @@ func (p *ReceiptRootProver) historicalRootProof(ctx context.Context, currentSlot
 	if err != nil {
 		return nil, err
 	}
-
 	rootGindex := calculateArrayGindex(new(big.Int).Mod(targetSlot, big.NewInt(SLOTS_PER_HISTORICAL_LIMIT)))
 	historicalRootProof, err := stateTree.Prove(int(concatGindices([]int64{BLOCK_ROOTS_GINDEX, rootGindex})))
 	if err != nil {

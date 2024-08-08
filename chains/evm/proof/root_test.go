@@ -11,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/attestantio/go-eth2-client/api"
-	apiv1 "github.com/attestantio/go-eth2-client/api/v1"
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/deneb"
 	"github.com/stretchr/testify/suite"
@@ -34,16 +33,6 @@ func TestRunReceiptRootProofTestSuite(t *testing.T) {
 func (s *ReceiptRootProofTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	s.mockBeaconClient = mock.NewMockBeaconClient(ctrl)
-
-	beaconBlockHeader := &apiv1.BeaconBlockHeader{}
-	headerBytes, err := os.ReadFile("./stubs/header.json")
-	if err != nil {
-		panic(err)
-	}
-	_ = beaconBlockHeader.UnmarshalJSON(headerBytes)
-	s.mockBeaconClient.EXPECT().BeaconBlockHeader(gomock.Any(), gomock.Any()).Return(&api.Response[*apiv1.BeaconBlockHeader]{
-		Data: beaconBlockHeader,
-	}, nil).AnyTimes()
 
 	beaconState := &spec.VersionedBeaconState{
 		Deneb: &deneb.BeaconState{},
@@ -104,9 +93,9 @@ func (s *ReceiptRootProofTestSuite) Test_ReceiptRootProof_SlotDifferent() {
 		"549bdebf58b3048217f3853462337b18fb410d36768f35fa227b6e8bbedd5e82",
 		"eab572026cded9cddada269b7054f84d839d2d424ee93065f9d07c026c24b7eb",
 		"51df3ff10a34eafbecc355d793e4a12d43bc0df8787d2ec345e5b685e7f71da1",
-		"7f81497ad30b4d3215e6c18222b277bf0dbc6ba315b1df3dd49a45c09f8aa569",
-		"59f0fb8994c3f33d8aefaf635e57bd4732cc6f718e09ed4e5d78ca1e4876a802",
-		"01a16c157ec2dca5bd7eef2436d104d5c6fd970b476bcec30f41baabbeddc815",
+		"324de181c3f04cb1a16f1bb16da93281c6d0201f220d28a849ce8ab2472f5baf",
+		"45423fe4a79cedf6b20bebdfd3f66ab4dc1e6ea65de8c3770ff486e3ff55ca7d",
+		"61fd5dd0434786fded209f2e9f715af40d4e7c802c37f98af3030a8ccd7df627",
 	}
 
 	p, err := s.prover.ReceiptsRootProof(context.Background(), big.NewInt(5544654), big.NewInt(5544653))
