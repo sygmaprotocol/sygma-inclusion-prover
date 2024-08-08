@@ -70,7 +70,7 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad_DefaultValues() {
 		BeaconEndpoint:        "endpoint",
 		StateRootAddresses:    []string{"0x1", "0x2"},
 		SlotIndex:             1,
-		BlockConfirmations:    10,
+		BlockConfirmations:    1,
 		BlockInterval:         5,
 		BlockRetryInterval:    5,
 		Latest:                false,

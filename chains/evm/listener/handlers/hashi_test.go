@@ -78,7 +78,7 @@ func (s *HashiHandlerTestSuite) Test_HandleMessage_ValidMessage() {
 		},
 		nil,
 	)
-	s.mockClient.EXPECT().BlockByHash(gomock.Any(), txHash).Return(types.NewBlock(&types.Header{
+	s.mockClient.EXPECT().BlockByHash(gomock.Any(), gomock.Any()).Return(types.NewBlock(&types.Header{
 		ParentBeaconRoot: &common.Hash{},
 	}, nil, nil, nil, nil), nil)
 	s.mockClient.EXPECT().TransactionReceipt(gomock.Any(), txHash).Return(&types.Receipt{}, nil)
