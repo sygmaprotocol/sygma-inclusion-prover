@@ -44,6 +44,20 @@ func (c *HashiAdapterContract) VerifyAndStoreDispatchedMessage(
 	return c.ExecuteTransaction(
 		"verifyAndStoreDispatchedMessage",
 		opts,
-		srcSlot, txSlot, receiptsRootProof, receiptsRoot, receiptProof, txIndexRLPEncoded, logIndex,
+		srcSlot, txSlot, Bytes32Array(receiptsRootProof), SliceTo32Bytes(receiptsRoot[:]), receiptProof, txIndexRLPEncoded, logIndex,
 	)
+}
+
+func SliceTo32Bytes(in []byte) [32]byte {
+	var res [32]byte
+	copy(res[:], in)
+	return res
+}
+
+func Bytes32Array(array [][]byte) [][32]byte {
+	bytes32Array := make([][32]byte, len(array))
+	for i, e := range array {
+		bytes32Array[i] = SliceTo32Bytes(e[:])
+	}
+	return bytes32Array
 }

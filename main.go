@@ -132,6 +132,13 @@ func main() {
 				if err != nil {
 					panic(err)
 				}
+				if startBlock == nil {
+					latestBlock, err := client.LatestBlock()
+					if err != nil {
+						panic(err)
+					}
+					startBlock = latestBlock
+				}
 
 				receiptProver := proof.NewReceiptProver(client)
 				rootProver := proof.NewReceiptRootProver(beaconProvider)

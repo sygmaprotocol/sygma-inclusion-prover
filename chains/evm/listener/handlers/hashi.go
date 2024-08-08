@@ -117,7 +117,11 @@ func (h *HashiEventHandler) handleMessage(l types.Log, destination uint8, slot *
 		return nil, nil
 	}
 
-	block, err := h.client.BlockByHash(context.Background(), l.TxHash)
+	receipt, err := h.client.TransactionReceipt(context.Background(), l.TxHash)
+	if err != nil {
+		return nil, err
+	}
+	block, err := h.client.BlockByHash(context.Background(), receipt.BlockHash)
 	if err != nil {
 		return nil, err
 	}
@@ -127,16 +131,13 @@ func (h *HashiEventHandler) handleMessage(l types.Log, destination uint8, slot *
 	if err != nil {
 		return nil, err
 	}
-	txSlot := new(big.Int).SetUint64(uint64(beaconBlock.Data.Header.Message.Slot))
+
+	txSlot := new(big.Int).SetUint64(uint64(beaconBlock.Data.Header.Message.Slot + 1))
 	rootProof, err := h.rootProver.ReceiptsRootProof(context.Background(), slot, txSlot)
 	if err != nil {
 		return nil, err
 	}
 
-	receipt, err := h.client.TransactionReceipt(context.Background(), l.TxHash)
-	if err != nil {
-		return nil, err
-	}
 	txIndexRLP, err := rlp.EncodeToBytes(receipt.TransactionIndex)
 	if err != nil {
 		return nil, err

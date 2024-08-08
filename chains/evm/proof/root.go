@@ -89,7 +89,7 @@ func (p *ReceiptRootProver) historicalRootProof(ctx context.Context, currentSlot
 	}
 
 	state, err := p.beaconClient.BeaconState(ctx, &api.BeaconStateOpts{
-		State: beaconBlockHeader.Data.Header.Message.StateRoot.String(),
+		State: strconv.FormatUint(uint64(beaconBlockHeader.Data.Header.Message.Slot), 10),
 	})
 	if err != nil {
 		return nil, err
@@ -99,10 +99,7 @@ func (p *ReceiptRootProver) historicalRootProof(ctx context.Context, currentSlot
 		return nil, err
 	}
 
-	rootGindex, err := calculateGindex(new(big.Int).Mod(targetSlot, big.NewInt(SLOTS_PER_HISTORICAL_LIMIT)))
-	if err != nil {
-		return nil, err
-	}
+	rootGindex := calculateArrayGindex(new(big.Int).Mod(targetSlot, big.NewInt(SLOTS_PER_HISTORICAL_LIMIT)))
 	historicalRootProof, err := stateTree.Prove(int(concatGindices([]int64{BLOCK_ROOTS_GINDEX, rootGindex})))
 	if err != nil {
 		return nil, err
@@ -129,10 +126,18 @@ func (p *ReceiptRootProver) receiptsRootProof(ctx context.Context, slot *big.Int
 	return receiptsRootProof.Hashes, nil
 }
 
-func calculateGindex(index *big.Int) (int64, error) {
-	binaryIndex := strconv.FormatUint(index.Uint64(), 2)
-	gindex := "1" + binaryIndex
-	return strconv.ParseInt(gindex, 2, 64)
+func calculateArrayGindex(elementIndex *big.Int) int64 {
+	gindex := int64(1)
+	index := elementIndex.Int64()
+
+	depth := 0
+	for (1 << depth) < SLOTS_PER_HISTORICAL_LIMIT {
+		depth++
+	}
+	for d := 0; d < depth; d++ {
+		gindex = (gindex << 1) | ((index >> (depth - d - 1)) & 1)
+	}
+	return gindex
 }
 
 func concatGindices(gindices []int64) int64 {
