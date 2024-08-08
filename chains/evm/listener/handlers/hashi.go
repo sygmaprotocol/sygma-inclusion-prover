@@ -132,7 +132,11 @@ func (h *HashiEventHandler) handleMessage(l types.Log, destination uint8, slot *
 		return nil, err
 	}
 
-	txSlot := new(big.Int).SetUint64(uint64(beaconBlock.Data.Header.Message.Slot + 1))
+	txSlot, err := h.slotChild(new(big.Int).SetUint64(uint64(beaconBlock.Data.Header.Message.Slot)))
+	if err != nil {
+		return nil, err
+	}
+
 	rootProof, err := h.rootProver.ReceiptsRootProof(context.Background(), slot, txSlot)
 	if err != nil {
 		return nil, err
@@ -157,6 +161,30 @@ func (h *HashiEventHandler) handleMessage(l types.Log, destination uint8, slot *
 		TxIndexRLPEncoded: txIndexRLP,
 		LogIndex:          h.logIndex(receipt, l),
 	}), nil
+}
+
+func (h *HashiEventHandler) slotChild(slot *big.Int) (*big.Int, error) {
+	tries := 0
+	childSlot := new(big.Int).Add(slot, big.NewInt(1))
+	for tries < 16 {
+		beaconBlockHeader, err := h.beaconClient.BeaconBlockHeader(context.Background(), &api.BeaconBlockHeaderOpts{
+			Block: childSlot.String(),
+		})
+		if err != nil {
+			// slot is missing and the child slot is the next one
+			if strings.Contains(err.Error(), "Not Found") {
+				tries++
+				childSlot = new(big.Int).Add(childSlot, big.NewInt(1))
+				continue
+			}
+
+			return nil, err
+		}
+
+		return new(big.Int).SetUint64(uint64(beaconBlockHeader.Data.Header.Message.Slot)), nil
+	}
+
+	return nil, fmt.Errorf("failed to find child of slot %d", slot)
 }
 
 func (h *HashiEventHandler) logIndex(receipt *types.Receipt, log types.Log) *big.Int {
