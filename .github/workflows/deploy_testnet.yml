@@ -11,7 +11,7 @@ on:
 env:
   ENVIRONMENT: 'TESTNET'
   REGISTRY: 'ghcr.io'
-  TAG: ${{ github.ref_name }}
+  TAG: 'latest'
   AWS_TESTNET: '${{ secrets.AWS_ARN }}'
 
 jobs:
@@ -82,7 +82,7 @@ jobs:
             awsAccountId=${{ env.AWS_TESTNET }}
             awsRegion=${{ secrets.AWS_REGION }}
             awsEfs=${{ secrets.INCLUSION_EFS_TESTNET }}
-            imageTag=${{ env.Tag }}
+            imageTag=${{ env.TAG }}
 
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
