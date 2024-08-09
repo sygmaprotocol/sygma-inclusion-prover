@@ -126,7 +126,7 @@ func (h *DepositEventHandler) fetchDeposits(destinationDomain uint8, startBlock 
 			continue
 		}
 
-		log.Debug().Msgf("Found deposit log in block: %d, TxHash: %s, contractAddress: %s, sender: %s", dl.BlockNumber, dl.TxHash, dl.Address, d.SenderAddress)
+		log.Info().Msgf("Found deposit log in block: %d, TxHash: %s, contractAddress: %s, sender: %s", dl.BlockNumber, dl.TxHash, dl.Address, d.SenderAddress)
 		deposits = append(deposits, d)
 	}
 

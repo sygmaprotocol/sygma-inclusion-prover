@@ -101,6 +101,8 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 	}
 	endBlock := big.NewInt(int64(block.Data.Deneb.Message.Body.ExecutionPayload.BlockNumber))
 
+	log.Debug().Uint8("domainID", m.Destination).Msgf("Handling events %d-%d", startBlock, endBlock)
+
 	err = h.hashiHandler.HandleMessages(m.Source, new(big.Int).Set(startBlock), new(big.Int).Set(endBlock), stateRoot.Slot)
 	if err != nil {
 		return nil, err
