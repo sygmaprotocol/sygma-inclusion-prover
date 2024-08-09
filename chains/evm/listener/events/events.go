@@ -12,6 +12,7 @@ import (
 const (
 	StateRootSubmittedSig = "StateRootSubmitted(uint8,uint256,bytes32)"
 	DepositSig            = "Deposit(uint8,uint8,bytes32,uint64,address,bytes)"
+	MessageDispatchedSig  = "MessageDispatched(uint256,(uint256,uint256,uint256,address,address,bytes,address[],address[]))"
 )
 
 type StateRootSubmitted struct {
@@ -36,4 +37,21 @@ type Deposit struct {
 	SenderAddress common.Address
 	// Deposit data
 	Data []byte
+}
+
+// MessageDispatched(uint256 indexed messageId, Message message);
+type MessageDispatched struct {
+	MessageID *big.Int
+	Message   Message
+}
+
+type Message struct {
+	Nonce         *big.Int
+	TargetChainID *big.Int
+	Threshold     *big.Int
+	Sender        common.Address
+	Receiver      common.Address
+	Data          []byte
+	Reporters     []common.Address
+	Adapters      []common.Address
 }

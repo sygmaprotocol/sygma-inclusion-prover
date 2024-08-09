@@ -15,6 +15,7 @@ import (
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/deneb"
 	"github.com/stretchr/testify/suite"
+	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/config"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/proof"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/mock"
 	"go.uber.org/mock/gomock"
@@ -34,16 +35,6 @@ func TestRunReceiptRootProofTestSuite(t *testing.T) {
 func (s *ReceiptRootProofTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	s.mockBeaconClient = mock.NewMockBeaconClient(ctrl)
-
-	beaconBlockHeader := &apiv1.BeaconBlockHeader{}
-	headerBytes, err := os.ReadFile("./stubs/header.json")
-	if err != nil {
-		panic(err)
-	}
-	_ = beaconBlockHeader.UnmarshalJSON(headerBytes)
-	s.mockBeaconClient.EXPECT().BeaconBlockHeader(gomock.Any(), gomock.Any()).Return(&api.Response[*apiv1.BeaconBlockHeader]{
-		Data: beaconBlockHeader,
-	}, nil).AnyTimes()
 
 	beaconState := &spec.VersionedBeaconState{
 		Deneb: &deneb.BeaconState{},
@@ -69,7 +60,17 @@ func (s *ReceiptRootProofTestSuite) SetupTest() {
 		Data: block,
 	}, nil).AnyTimes()
 
-	s.prover = proof.NewReceiptRootProver(s.mockBeaconClient)
+	beaconBlockHeader := &apiv1.BeaconBlockHeader{}
+	headerBytes, err := os.ReadFile("./stubs/header.json")
+	if err != nil {
+		panic(err)
+	}
+	_ = beaconBlockHeader.UnmarshalJSON(headerBytes)
+	s.mockBeaconClient.EXPECT().BeaconBlockHeader(gomock.Any(), gomock.Any()).Return(&api.Response[*apiv1.BeaconBlockHeader]{
+		Data: beaconBlockHeader,
+	}, nil).AnyTimes()
+
+	s.prover = proof.NewReceiptRootProver(s.mockBeaconClient, config.MainnetSpec)
 }
 
 func (s *ReceiptRootProofTestSuite) Test_ReceiptRootProof_SlotDifferent() {

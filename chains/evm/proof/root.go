@@ -11,6 +11,10 @@ import (
 	"github.com/attestantio/go-eth2-client/api"
 	apiv1 "github.com/attestantio/go-eth2-client/api/v1"
 	"github.com/attestantio/go-eth2-client/spec"
+	"github.com/attestantio/go-eth2-client/spec/deneb"
+	ssz "github.com/ferranbt/fastssz"
+	gnosisDeneb "github.com/mpetrun5/go-eth2-client/spec/deneb"
+	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/config"
 )
 
 const (
@@ -45,27 +49,30 @@ type BeaconClient interface {
 
 type ReceiptRootProver struct {
 	beaconClient BeaconClient
+	spec         config.Spec
 }
 
-func NewReceiptRootProver(beaconClient BeaconClient) *ReceiptRootProver {
+func NewReceiptRootProver(beaconClient BeaconClient, spec config.Spec) *ReceiptRootProver {
 	return &ReceiptRootProver{
 		beaconClient: beaconClient,
+		spec:         spec,
 	}
 }
 
 // ReceiptRootProof returns the prove from the beacon block root to the receipt roof of the given slot.
 // The path for the proof is beacon block -> beacon state -> block roots -> execution payload header -> receipt root.
 func (p *ReceiptRootProver) ReceiptsRootProof(ctx context.Context, currentSlot *big.Int, targetSlot *big.Int) ([][]byte, error) {
-	beaconStateProof, err := p.historicalRootProof(ctx, currentSlot, targetSlot)
-	if err != nil {
-		return nil, err
-	}
 	receiptsRootProof, err := p.receiptsRootProof(ctx, targetSlot)
 	if err != nil {
 		return nil, err
 	}
 
 	if currentSlot.Cmp(targetSlot) != 0 {
+		beaconStateProof, err := p.historicalRootProof(ctx, currentSlot, targetSlot)
+		if err != nil {
+			return nil, err
+		}
+
 		return append(receiptsRootProof, beaconStateProof...), nil
 	} else {
 		return receiptsRootProof, nil
@@ -73,13 +80,13 @@ func (p *ReceiptRootProver) ReceiptsRootProof(ctx context.Context, currentSlot *
 }
 
 func (p *ReceiptRootProver) historicalRootProof(ctx context.Context, currentSlot *big.Int, targetSlot *big.Int) ([][]byte, error) {
-	beaconBlockHeader, err := p.beaconClient.BeaconBlockHeader(ctx, &api.BeaconBlockHeaderOpts{
+	beaconBlock, err := p.beaconClient.BeaconBlockHeader(ctx, &api.BeaconBlockHeaderOpts{
 		Block: currentSlot.String(),
 	})
 	if err != nil {
 		return nil, err
 	}
-	headerTree, err := beaconBlockHeader.Data.Header.Message.GetTree()
+	headerTree, err := beaconBlock.Data.Header.Message.GetTree()
 	if err != nil {
 		return nil, err
 	}
@@ -89,20 +96,17 @@ func (p *ReceiptRootProver) historicalRootProof(ctx context.Context, currentSlot
 	}
 
 	state, err := p.beaconClient.BeaconState(ctx, &api.BeaconStateOpts{
-		State: beaconBlockHeader.Data.Header.Message.StateRoot.String(),
+		State: strconv.FormatUint(currentSlot.Uint64(), 10),
 	})
 	if err != nil {
 		return nil, err
 	}
-	stateTree, err := state.Data.Deneb.GetTree()
-	if err != nil {
-		return nil, err
-	}
 
-	rootGindex, err := calculateGindex(new(big.Int).Mod(targetSlot, big.NewInt(SLOTS_PER_HISTORICAL_LIMIT)))
+	stateTree, err := p.stateTree(state.Data.Deneb)
 	if err != nil {
 		return nil, err
 	}
+	rootGindex := calculateArrayGindex(new(big.Int).Mod(targetSlot, big.NewInt(SLOTS_PER_HISTORICAL_LIMIT)))
 	historicalRootProof, err := stateTree.Prove(int(concatGindices([]int64{BLOCK_ROOTS_GINDEX, rootGindex})))
 	if err != nil {
 		return nil, err
@@ -111,28 +115,72 @@ func (p *ReceiptRootProver) historicalRootProof(ctx context.Context, currentSlot
 	return append(historicalRootProof.Hashes, stateProof.Hashes...), nil
 }
 
+func (p *ReceiptRootProver) stateTree(state *deneb.BeaconState) (*ssz.Node, error) {
+	if p.spec == config.GnosisSpec {
+		stateData, err := state.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		gnosisState := &gnosisDeneb.BeaconState{}
+		err = gnosisState.UnmarshalJSON(stateData)
+		if err != nil {
+			return nil, err
+		}
+
+		return gnosisState.GetTree()
+	}
+
+	return state.GetTree()
+}
+
+func (p *ReceiptRootProver) blockTree(block *deneb.BeaconBlock) (*ssz.Node, error) {
+	if p.spec == config.GnosisSpec {
+		blockData, err := block.MarshalJSON()
+		if err != nil {
+			return nil, err
+		}
+		gnosisBlock := &gnosisDeneb.BeaconBlock{}
+		err = gnosisBlock.UnmarshalJSON(blockData)
+		if err != nil {
+			return nil, err
+		}
+
+		return gnosisBlock.GetTree()
+	}
+
+	return block.GetTree()
+}
+
 func (p *ReceiptRootProver) receiptsRootProof(ctx context.Context, slot *big.Int) ([][]byte, error) {
-	beaconBlockHeader, err := p.beaconClient.SignedBeaconBlock(ctx, &api.SignedBeaconBlockOpts{
+	beaconBlock, err := p.beaconClient.SignedBeaconBlock(ctx, &api.SignedBeaconBlockOpts{
 		Block: slot.String(),
 	})
 	if err != nil {
 		return nil, err
 	}
-	headerTree, err := beaconBlockHeader.Data.Deneb.Message.GetTree()
+	blockTree, err := p.blockTree(beaconBlock.Data.Deneb.Message)
 	if err != nil {
 		return nil, err
 	}
-	receiptsRootProof, err := headerTree.Prove(RECEIPTS_ROOT_GINDEX)
+	receiptsRootProof, err := blockTree.Prove(RECEIPTS_ROOT_GINDEX)
 	if err != nil {
 		return nil, err
 	}
 	return receiptsRootProof.Hashes, nil
 }
 
-func calculateGindex(index *big.Int) (int64, error) {
-	binaryIndex := strconv.FormatUint(index.Uint64(), 2)
-	gindex := "1" + binaryIndex
-	return strconv.ParseInt(gindex, 2, 64)
+func calculateArrayGindex(elementIndex *big.Int) int64 {
+	gindex := int64(1)
+	index := elementIndex.Int64()
+
+	depth := 0
+	for (1 << depth) < SLOTS_PER_HISTORICAL_LIMIT {
+		depth++
+	}
+	for d := 0; d < depth; d++ {
+		gindex = (gindex << 1) | ((index >> (depth - d - 1)) & 1)
+	}
+	return gindex
 }
 
 func concatGindices(gindices []int64) int64 {

@@ -15,8 +15,6 @@ import (
 
 	api "github.com/attestantio/go-eth2-client/api"
 	spec "github.com/attestantio/go-eth2-client/spec"
-	common "github.com/ethereum/go-ethereum/common"
-	types "github.com/ethereum/go-ethereum/core/types"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -110,59 +108,76 @@ func (mr *MockBlockStorerMockRecorder) StoreBlock(sourceDomainID, destinationDom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreBlock", reflect.TypeOf((*MockBlockStorer)(nil).StoreBlock), sourceDomainID, destinationDomainID, blockNumber)
 }
 
-// MockClient is a mock of Client interface.
-type MockClient struct {
+// MockDepositHandler is a mock of DepositHandler interface.
+type MockDepositHandler struct {
 	ctrl     *gomock.Controller
-	recorder *MockClientMockRecorder
+	recorder *MockDepositHandlerMockRecorder
 }
 
-// MockClientMockRecorder is the mock recorder for MockClient.
-type MockClientMockRecorder struct {
-	mock *MockClient
+// MockDepositHandlerMockRecorder is the mock recorder for MockDepositHandler.
+type MockDepositHandlerMockRecorder struct {
+	mock *MockDepositHandler
 }
 
-// NewMockClient creates a new mock instance.
-func NewMockClient(ctrl *gomock.Controller) *MockClient {
-	mock := &MockClient{ctrl: ctrl}
-	mock.recorder = &MockClientMockRecorder{mock}
+// NewMockDepositHandler creates a new mock instance.
+func NewMockDepositHandler(ctrl *gomock.Controller) *MockDepositHandler {
+	mock := &MockDepositHandler{ctrl: ctrl}
+	mock.recorder = &MockDepositHandlerMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockClient) EXPECT() *MockClientMockRecorder {
+func (m *MockDepositHandler) EXPECT() *MockDepositHandlerMockRecorder {
 	return m.recorder
 }
 
-// CallContext mocks base method.
-func (m *MockClient) CallContext(ctx context.Context, target any, rpcMethod string, args ...any) error {
+// HandleDeposits mocks base method.
+func (m *MockDepositHandler) HandleDeposits(destination uint8, startBlock, endBlock, slot *big.Int) error {
 	m.ctrl.T.Helper()
-	varargs := []any{ctx, target, rpcMethod}
-	for _, a := range args {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "CallContext", varargs...)
+	ret := m.ctrl.Call(m, "HandleDeposits", destination, startBlock, endBlock, slot)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// CallContext indicates an expected call of CallContext.
-func (mr *MockClientMockRecorder) CallContext(ctx, target, rpcMethod any, args ...any) *gomock.Call {
+// HandleDeposits indicates an expected call of HandleDeposits.
+func (mr *MockDepositHandlerMockRecorder) HandleDeposits(destination, startBlock, endBlock, slot any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]any{ctx, target, rpcMethod}, args...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CallContext", reflect.TypeOf((*MockClient)(nil).CallContext), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleDeposits", reflect.TypeOf((*MockDepositHandler)(nil).HandleDeposits), destination, startBlock, endBlock, slot)
 }
 
-// FetchEventLogs mocks base method.
-func (m *MockClient) FetchEventLogs(ctx context.Context, contractAddress common.Address, event string, startBlock, endBlock *big.Int) ([]types.Log, error) {
+// MockHashiHandler is a mock of HashiHandler interface.
+type MockHashiHandler struct {
+	ctrl     *gomock.Controller
+	recorder *MockHashiHandlerMockRecorder
+}
+
+// MockHashiHandlerMockRecorder is the mock recorder for MockHashiHandler.
+type MockHashiHandlerMockRecorder struct {
+	mock *MockHashiHandler
+}
+
+// NewMockHashiHandler creates a new mock instance.
+func NewMockHashiHandler(ctrl *gomock.Controller) *MockHashiHandler {
+	mock := &MockHashiHandler{ctrl: ctrl}
+	mock.recorder = &MockHashiHandlerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockHashiHandler) EXPECT() *MockHashiHandlerMockRecorder {
+	return m.recorder
+}
+
+// HandleMessages mocks base method.
+func (m *MockHashiHandler) HandleMessages(destination uint8, startBlock, endBlock, slot *big.Int) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FetchEventLogs", ctx, contractAddress, event, startBlock, endBlock)
-	ret0, _ := ret[0].([]types.Log)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "HandleMessages", destination, startBlock, endBlock, slot)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// FetchEventLogs indicates an expected call of FetchEventLogs.
-func (mr *MockClientMockRecorder) FetchEventLogs(ctx, contractAddress, event, startBlock, endBlock any) *gomock.Call {
+// HandleMessages indicates an expected call of HandleMessages.
+func (mr *MockHashiHandlerMockRecorder) HandleMessages(destination, startBlock, endBlock, slot any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FetchEventLogs", reflect.TypeOf((*MockClient)(nil).FetchEventLogs), ctx, contractAddress, event, startBlock, endBlock)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleMessages", reflect.TypeOf((*MockHashiHandler)(nil).HandleMessages), destination, startBlock, endBlock, slot)
 }
