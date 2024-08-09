@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.3](https://github.com/sygmaprotocol/sygma-inclusion-prover/compare/v1.0.2...v1.0.3) (2024-06-07)
+
+
+### Bug Fixes
+
+* prevent sending empty batches ([#23](https://github.com/sygmaprotocol/sygma-inclusion-prover/issues/23)) ([5e22b2d](https://github.com/sygmaprotocol/sygma-inclusion-prover/commit/5e22b2dee3ca139243d779aa1d5ad3e68c75a974))
+
 ## [1.0.2](https://github.com/sygmaprotocol/sygma-inclusion-prover/compare/v1.0.1...v1.0.2) (2024-04-04)
 
 
