@@ -4,9 +4,9 @@
 name: Sygma Inclusion Prover
 
 on:
-  release:
-    types:
-      - published
+  push:
+    branches:
+      - test
       
 env:
   ENVIRONMENT: 'TESTNET'
