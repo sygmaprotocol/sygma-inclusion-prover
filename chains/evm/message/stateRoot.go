@@ -96,7 +96,7 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 	if err != nil {
 		return nil, err
 	}
-	if startBlock.Cmp(big.NewInt(0)) == 0 {
+	if startBlock.Cmp(big.NewInt(0)) == 0 || h.startBlock.Cmp(startBlock) == 1 {
 		startBlock = h.startBlock
 	}
 	endBlock := big.NewInt(int64(block.Data.Deneb.Message.Body.ExecutionPayload.BlockNumber))
