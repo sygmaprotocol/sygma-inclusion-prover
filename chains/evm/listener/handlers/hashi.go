@@ -87,7 +87,7 @@ func (h *HashiEventHandler) HandleMessages(destination uint8, startBlock *big.In
 
 	msgs := make([]*message.Message, 0)
 	for _, l := range logs {
-		log.Info().Msgf("Found Hashi message log in block: %d, TxHash: %s, contractAddress: %s", l.BlockNumber, l.TxHash)
+		log.Info().Msgf("Found Hashi message log in block: %d, TxHash: %s", l.BlockNumber, l.TxHash)
 
 		msg, err := h.handleMessage(l, destination, slot)
 		if err != nil {

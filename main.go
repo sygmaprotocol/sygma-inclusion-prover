@@ -140,6 +140,8 @@ func main() {
 					startBlock = latestBlock
 				}
 
+				log.Debug().Uint8("domainID", id).Msgf("Starting block %d", startBlock)
+
 				receiptProver := proof.NewReceiptProver(client)
 				rootProver := proof.NewReceiptRootProver(beaconProvider, config.Spec)
 				yahoAddress := common.HexToAddress(config.Yaho)
