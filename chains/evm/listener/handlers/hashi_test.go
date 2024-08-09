@@ -90,7 +90,7 @@ func (s *HashiHandlerTestSuite) Test_HandleMessage_ValidMessage() {
 				},
 			},
 		},
-	}, nil)
+	}, nil).AnyTimes()
 	s.mockReceiptProver.EXPECT().ReceiptProof(gomock.Any()).Return([][]byte{{1}}, nil)
 	s.mockRootProver.EXPECT().ReceiptsRootProof(gomock.Any(), gomock.Any(), gomock.Any()).Return([][]byte{{2}}, nil)
 

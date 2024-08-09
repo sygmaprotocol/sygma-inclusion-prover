@@ -15,6 +15,7 @@ import (
 	"github.com/attestantio/go-eth2-client/spec"
 	"github.com/attestantio/go-eth2-client/spec/deneb"
 	"github.com/stretchr/testify/suite"
+	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/config"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/proof"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/mock"
 	"go.uber.org/mock/gomock"
@@ -69,7 +70,7 @@ func (s *ReceiptRootProofTestSuite) SetupTest() {
 		Data: beaconBlockHeader,
 	}, nil).AnyTimes()
 
-	s.prover = proof.NewReceiptRootProver(s.mockBeaconClient)
+	s.prover = proof.NewReceiptRootProver(s.mockBeaconClient, config.MainnetSpec)
 }
 
 func (s *ReceiptRootProofTestSuite) Test_ReceiptRootProof_SlotDifferent() {
