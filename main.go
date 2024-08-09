@@ -102,7 +102,7 @@ func main() {
 				beaconClient, err := http.New(ctx,
 					http.WithAddress(config.BeaconEndpoint),
 					http.WithLogLevel(logLevel),
-					http.WithTimeout(time.Second*30),
+					http.WithTimeout(time.Minute*5),
 				)
 				if err != nil {
 					panic(err)
