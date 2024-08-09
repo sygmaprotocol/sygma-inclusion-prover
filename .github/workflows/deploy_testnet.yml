@@ -11,7 +11,7 @@ on:
 env:
   ENVIRONMENT: 'TESTNET'
   REGISTRY: 'ghcr.io'
-  TAG: ${{ github.event.release.tag_name }}
+  TAG: ${{ github.ref_name }}
   AWS_TESTNET: '${{ secrets.AWS_ARN }}'
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.TAG }}
 
       - name: slack notify
         uses: 8398a7/action-slack@v3
