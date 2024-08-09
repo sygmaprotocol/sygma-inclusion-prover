@@ -81,6 +81,7 @@ func main() {
 				if err != nil {
 					panic(err)
 				}
+				config.Latest = true
 
 				kp, err := secp256k1.NewKeypairFromString(config.Key)
 				if err != nil {
