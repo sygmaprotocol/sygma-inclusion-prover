@@ -10,6 +10,13 @@ import (
 	"github.com/sygmaprotocol/sygma-inclusion-prover/config"
 )
 
+type Spec string
+
+const (
+	MainnetSpec Spec = "mainnet"
+	GnosisSpec  Spec = "gnosis"
+)
+
 type EVMConfig struct {
 	config.BaseNetworkConfig
 	BeaconEndpoint        string   `required:"true" split_words:"true"`
@@ -29,6 +36,7 @@ type EVMConfig struct {
 	FreshStart            bool     `default:"false" split_words:"true"`
 	Latest                bool     `default:"false" split_words:"true"`
 	GenericResources      []string `default:"0000000000000000000000000000000000000000000000000000000000000500" split_words:"true"`
+	Spec                  Spec     `default:"mainnet"`
 }
 
 // LoadEVMConfig loads EVM config from the environment and validates the fields

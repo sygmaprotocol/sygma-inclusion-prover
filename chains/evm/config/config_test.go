@@ -77,6 +77,7 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad_DefaultValues() {
 		FreshStart:            false,
 		StartBlock:            120,
 		GenericResources:      []string{"0000000000000000000000000000000000000000000000000000000000000500"},
+		Spec:                  config.MainnetSpec,
 	})
 }
 
@@ -101,6 +102,7 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_FRESH_START", "true")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_LATEST", "true")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_GENERIC_RESOURCES", "1,2")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_SPEC", "gnosis")
 
 	c, err := config.LoadEVMConfig(1)
 
@@ -127,5 +129,6 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 		GenericResources:      []string{"1", "2"},
 		Yaho:                  "yaho",
 		Hashi:                 "hashi",
+		Spec:                  config.GnosisSpec,
 	})
 }

@@ -141,7 +141,7 @@ func main() {
 				}
 
 				receiptProver := proof.NewReceiptProver(client)
-				rootProver := proof.NewReceiptRootProver(beaconProvider)
+				rootProver := proof.NewReceiptRootProver(beaconProvider, config.Spec)
 				yahoAddress := common.HexToAddress(config.Yaho)
 				routerAddress := common.HexToAddress(config.Router)
 				hashiEventHandler := handlers.NewHashiEventHandler(id, client, beaconProvider, receiptProver, rootProver, yahoAddress, cfg.ChainIDS, msgChan)

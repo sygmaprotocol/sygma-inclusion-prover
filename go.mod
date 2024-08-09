@@ -5,7 +5,9 @@ go 1.22
 require (
 	github.com/attestantio/go-eth2-client v0.21.10
 	github.com/ethereum/go-ethereum v1.13.12
+	github.com/ferranbt/fastssz v0.1.3
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/mpetrun5/go-eth2-client v0.0.0-20240809122107-4912608b7fc5
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.9.0
 	github.com/sygmaprotocol/sygma-core v0.0.0-20240213143226-6c21c763eefc
@@ -39,7 +41,6 @@ require (
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
 	github.com/ethereum/c-kzg-4844 v0.4.0 // indirect
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/ferranbt/fastssz v0.1.3 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gballet/go-libpcsclite v0.0.0-20191108122812-4678299bea08 // indirect
 	github.com/gballet/go-verkle v0.1.1-0.20231031103413-a67434b50f46 // indirect
@@ -122,4 +123,4 @@ require (
 	rsc.io/tmplfunc v0.0.3 // indirect
 )
 
-replace github.com/umbracle/go-eth-consensus => github.com/sygmaprotocol/go-eth-consensus v0.0.0-20240209115220-99232c637bc3
+replace github.com/attestantio/go-eth2-client/http/gnosis => ../go-eth-client
