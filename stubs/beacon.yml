@@ -48,6 +48,15 @@
       {"data":{"version":"Lodestar/v1.15.1/1857a49"}}
 
 - request:
+    url: /eth/v1/node/syncing
+    method: GET
+  response:
+    headers:
+      content-type: application/json
+    body: >
+      {"data":{"head_slot":"5825134","sync_distance":"0","is_syncing":false,"is_optimistic":false,"el_offline":false}}
+
+- request:
     url: /eth/v2/beacon/blocks/100
     method: GET
   response:
