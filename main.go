@@ -92,74 +92,92 @@ func main() {
 					panic(err)
 				}
 
+				var evmListener *listener.EVMListener
+				var startBlock *big.Int
+				if len(config.StateRootAddresses) > 0 {
+					eventHandlers := []listener.EventHandler{}
+					for _, stateRootAddress := range config.StateRootAddresses {
+						eventHandlers = append(eventHandlers, handlers.NewStateRootEventHandler(msgChan, client, common.HexToAddress(stateRootAddress), id))
+					}
+					evmListener = listener.NewEVMListener(
+						client,
+						eventHandlers,
+						blockStore,
+						&metrics.RelayerMetrics{},
+						id,
+						time.Duration(config.BlockRetryInterval)*time.Second,
+						big.NewInt(config.BlockConfirmations),
+						big.NewInt(config.BlockInterval))
+
+					startBlock, err = blockStore.GetStartBlock(
+						id,
+						new(big.Int).SetUint64(config.StartBlock),
+						config.Latest,
+						config.FreshStart,
+					)
+					if err != nil {
+						panic(err)
+					}
+					if startBlock == nil {
+						latestBlock, err := client.LatestBlock()
+						if err != nil {
+							panic(err)
+						}
+						startBlock = latestBlock
+					}
+				}
+
+				messageHandler := message.NewMessageHandler()
+				messageHandler.RegisterMessageHandler(evmMessage.EVMTransferMessage, &evmMessage.TransferHandler{})
+				messageHandler.RegisterMessageHandler(evmMessage.HashiMessage, &evmMessage.HashiMessageHandler{})
+				if config.Yaho != "" || config.Router != "" {
+					beaconClient, err := http.New(ctx,
+						http.WithAddress(config.BeaconEndpoint),
+						http.WithLogLevel(logLevel),
+						http.WithTimeout(time.Second*30),
+					)
+					if err != nil {
+						panic(err)
+					}
+					beaconProvider := beaconClient.(*http.Service)
+					receiptProver := proof.NewReceiptProver(client)
+					rootProver := proof.NewReceiptRootProver(beaconProvider, config.Spec)
+
+					stateRootEventHandlers := make([]evmMessage.EventHandler, 0)
+					if config.Yaho != "" {
+						yahoAddress := common.HexToAddress(config.Yaho)
+						stateRootEventHandlers = append(
+							stateRootEventHandlers,
+							handlers.NewHashiEventHandler(
+								id, client, beaconProvider, receiptProver, rootProver, yahoAddress, cfg.ChainIDS, msgChan),
+						)
+
+					}
+					if config.Router != "" {
+						routerAddress := common.HexToAddress(config.Router)
+						stateRootEventHandlers = append(
+							stateRootEventHandlers,
+							handlers.NewDepositEventHandler(
+								id, client, routerAddress, config.SlotIndex, config.GenericResources, msgChan),
+						)
+					}
+					messageHandler.RegisterMessageHandler(
+						evmMessage.EVMStateRootMessage,
+						evmMessage.NewStateRootHandler(id, stateRootEventHandlers, beaconProvider, latestBlockStore, new(big.Int).Set(startBlock)))
+				}
+
 				gasPricer := gas.NewLondonGasPriceClient(client, &gas.GasPricerOpts{
 					UpperLimitFeePerGas: big.NewInt(config.MaxGasPrice),
 					GasPriceFactor:      big.NewFloat(config.GasMultiplier),
 				})
 				t := monitored.NewMonitoredTransactor(transaction.NewTransaction, gasPricer, client, big.NewInt(config.MaxGasPrice), big.NewInt(config.GasIncreasePercentage))
 				go t.Monitor(ctx, time.Minute*3, time.Minute*10, time.Minute)
-
-				beaconClient, err := http.New(ctx,
-					http.WithAddress(config.BeaconEndpoint),
-					http.WithLogLevel(logLevel),
-					http.WithTimeout(time.Second*30),
-				)
-				if err != nil {
-					panic(err)
-				}
-				beaconProvider := beaconClient.(*http.Service)
-
-				eventHandlers := []listener.EventHandler{}
-				for _, stateRootAddress := range config.StateRootAddresses {
-					eventHandlers = append(eventHandlers, handlers.NewStateRootEventHandler(msgChan, client, common.HexToAddress(stateRootAddress), id))
-				}
-				listener := listener.NewEVMListener(
-					client,
-					eventHandlers,
-					blockStore,
-					&metrics.RelayerMetrics{},
-					id,
-					time.Duration(config.BlockRetryInterval)*time.Second,
-					big.NewInt(config.BlockConfirmations),
-					big.NewInt(config.BlockInterval))
-
-				startBlock, err := blockStore.GetStartBlock(
-					id,
-					new(big.Int).SetUint64(config.StartBlock),
-					config.Latest,
-					config.FreshStart,
-				)
-				if err != nil {
-					panic(err)
-				}
-				if startBlock == nil {
-					latestBlock, err := client.LatestBlock()
-					if err != nil {
-						panic(err)
-					}
-					startBlock = latestBlock
-				}
-
-				receiptProver := proof.NewReceiptProver(client)
-				rootProver := proof.NewReceiptRootProver(beaconProvider, config.Spec)
-				yahoAddress := common.HexToAddress(config.Yaho)
-				routerAddress := common.HexToAddress(config.Router)
-				hashiEventHandler := handlers.NewHashiEventHandler(id, client, beaconProvider, receiptProver, rootProver, yahoAddress, cfg.ChainIDS, msgChan)
-				depositEventHandler := handlers.NewDepositEventHandler(id, client, routerAddress, config.SlotIndex, config.GenericResources, msgChan)
-
-				messageHandler := message.NewMessageHandler()
-				messageHandler.RegisterMessageHandler(
-					evmMessage.EVMStateRootMessage,
-					evmMessage.NewStateRootHandler(id, depositEventHandler, hashiEventHandler, beaconProvider, latestBlockStore, new(big.Int).Set(startBlock)))
-				messageHandler.RegisterMessageHandler(evmMessage.EVMTransferMessage, &evmMessage.TransferHandler{})
-				messageHandler.RegisterMessageHandler(evmMessage.HashiMessage, &evmMessage.HashiMessageHandler{})
-
 				evmExecutor := executor.NewEVMExecutor(
 					id,
 					contracts.NewExecutorContract(common.HexToAddress(config.Executor), client, t),
 					contracts.NewHashiAdapterContract(common.HexToAddress(config.Hashi), client, t),
 				)
-				chain := evm.NewEVMChain(listener, messageHandler, evmExecutor, id, startBlock)
+				chain := evm.NewEVMChain(evmListener, messageHandler, evmExecutor, id, startBlock)
 				chains[id] = chain
 			}
 		default:

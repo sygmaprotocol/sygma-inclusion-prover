@@ -79,7 +79,7 @@ func NewHashiEventHandler(
 	}
 }
 
-func (h *HashiEventHandler) HandleMessages(destination uint8, startBlock *big.Int, endBlock *big.Int, slot *big.Int) error {
+func (h *HashiEventHandler) HandleEvents(destination uint8, startBlock *big.Int, endBlock *big.Int, slot *big.Int) error {
 	logs, err := h.fetchMessages(startBlock, endBlock)
 	if err != nil {
 		return err

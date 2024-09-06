@@ -19,11 +19,11 @@ const (
 
 type EVMConfig struct {
 	config.BaseNetworkConfig
-	BeaconEndpoint        string   `required:"true" split_words:"true"`
-	Router                string   `required:"true"`
-	Executor              string   `required:"true"`
-	Hashi                 string   `required:"true"`
-	Yaho                  string   `required:"true"`
+	BeaconEndpoint        string `split_words:"true"`
+	Router                string
+	Executor              string
+	Hashi                 string
+	Yaho                  string
 	MaxGasPrice           int64    `default:"500000000000" split_words:"true"`
 	GasMultiplier         float64  `default:"1" split_words:"true"`
 	GasIncreasePercentage int64    `default:"15" split_words:"true"`

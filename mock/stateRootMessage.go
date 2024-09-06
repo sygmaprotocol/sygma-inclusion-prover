@@ -108,76 +108,39 @@ func (mr *MockBlockStorerMockRecorder) StoreBlock(sourceDomainID, destinationDom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "StoreBlock", reflect.TypeOf((*MockBlockStorer)(nil).StoreBlock), sourceDomainID, destinationDomainID, blockNumber)
 }
 
-// MockDepositHandler is a mock of DepositHandler interface.
-type MockDepositHandler struct {
+// MockEventHandler is a mock of EventHandler interface.
+type MockEventHandler struct {
 	ctrl     *gomock.Controller
-	recorder *MockDepositHandlerMockRecorder
+	recorder *MockEventHandlerMockRecorder
 }
 
-// MockDepositHandlerMockRecorder is the mock recorder for MockDepositHandler.
-type MockDepositHandlerMockRecorder struct {
-	mock *MockDepositHandler
+// MockEventHandlerMockRecorder is the mock recorder for MockEventHandler.
+type MockEventHandlerMockRecorder struct {
+	mock *MockEventHandler
 }
 
-// NewMockDepositHandler creates a new mock instance.
-func NewMockDepositHandler(ctrl *gomock.Controller) *MockDepositHandler {
-	mock := &MockDepositHandler{ctrl: ctrl}
-	mock.recorder = &MockDepositHandlerMockRecorder{mock}
+// NewMockEventHandler creates a new mock instance.
+func NewMockEventHandler(ctrl *gomock.Controller) *MockEventHandler {
+	mock := &MockEventHandler{ctrl: ctrl}
+	mock.recorder = &MockEventHandlerMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockDepositHandler) EXPECT() *MockDepositHandlerMockRecorder {
+func (m *MockEventHandler) EXPECT() *MockEventHandlerMockRecorder {
 	return m.recorder
 }
 
-// HandleDeposits mocks base method.
-func (m *MockDepositHandler) HandleDeposits(destination uint8, startBlock, endBlock, slot *big.Int) error {
+// HandleEvents mocks base method.
+func (m *MockEventHandler) HandleEvents(destination uint8, startBlock, endBlock, slot *big.Int) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HandleDeposits", destination, startBlock, endBlock, slot)
+	ret := m.ctrl.Call(m, "HandleEvents", destination, startBlock, endBlock, slot)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// HandleDeposits indicates an expected call of HandleDeposits.
-func (mr *MockDepositHandlerMockRecorder) HandleDeposits(destination, startBlock, endBlock, slot any) *gomock.Call {
+// HandleEvents indicates an expected call of HandleEvents.
+func (mr *MockEventHandlerMockRecorder) HandleEvents(destination, startBlock, endBlock, slot any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleDeposits", reflect.TypeOf((*MockDepositHandler)(nil).HandleDeposits), destination, startBlock, endBlock, slot)
-}
-
-// MockHashiHandler is a mock of HashiHandler interface.
-type MockHashiHandler struct {
-	ctrl     *gomock.Controller
-	recorder *MockHashiHandlerMockRecorder
-}
-
-// MockHashiHandlerMockRecorder is the mock recorder for MockHashiHandler.
-type MockHashiHandlerMockRecorder struct {
-	mock *MockHashiHandler
-}
-
-// NewMockHashiHandler creates a new mock instance.
-func NewMockHashiHandler(ctrl *gomock.Controller) *MockHashiHandler {
-	mock := &MockHashiHandler{ctrl: ctrl}
-	mock.recorder = &MockHashiHandlerMockRecorder{mock}
-	return mock
-}
-
-// EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockHashiHandler) EXPECT() *MockHashiHandlerMockRecorder {
-	return m.recorder
-}
-
-// HandleMessages mocks base method.
-func (m *MockHashiHandler) HandleMessages(destination uint8, startBlock, endBlock, slot *big.Int) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "HandleMessages", destination, startBlock, endBlock, slot)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// HandleMessages indicates an expected call of HandleMessages.
-func (mr *MockHashiHandlerMockRecorder) HandleMessages(destination, startBlock, endBlock, slot any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleMessages", reflect.TypeOf((*MockHashiHandler)(nil).HandleMessages), destination, startBlock, endBlock, slot)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandleEvents", reflect.TypeOf((*MockEventHandler)(nil).HandleEvents), destination, startBlock, endBlock, slot)
 }

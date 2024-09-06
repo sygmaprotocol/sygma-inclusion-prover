@@ -62,7 +62,7 @@ func (s *DepositHandlerTestSuite) SetupTest() {
 func (s *DepositHandlerTestSuite) Test_HandleEvents_NoDeposits() {
 	s.mockClient.EXPECT().FetchEventLogs(context.Background(), s.routerAddress, string(events.DepositSig), big.NewInt(80), big.NewInt(100))
 
-	err := s.depositHandler.HandleDeposits(s.destinationDomain, big.NewInt(80), big.NewInt(100), big.NewInt(150))
+	err := s.depositHandler.HandleEvents(s.destinationDomain, big.NewInt(80), big.NewInt(100), big.NewInt(150))
 
 	s.Nil(err)
 	_, err = readFromChannel(s.msgChan)
@@ -105,7 +105,7 @@ func (s *DepositHandlerTestSuite) Test_HandleEvents_ValidDeposits() {
 			return nil
 		}).Times(2)
 
-	err := s.depositHandler.HandleDeposits(s.destinationDomain, big.NewInt(80), big.NewInt(100), big.NewInt(150))
+	err := s.depositHandler.HandleEvents(s.destinationDomain, big.NewInt(80), big.NewInt(100), big.NewInt(150))
 
 	s.Nil(err)
 	msgs, err := readFromChannel(s.msgChan)
@@ -169,7 +169,7 @@ func (s *DepositHandlerTestSuite) Test_HandleEvents_ValidDeposits_LargeBlockRang
 			return nil
 		}).Times(3)
 
-	err := s.depositHandler.HandleDeposits(s.destinationDomain, big.NewInt(80), big.NewInt(2432), big.NewInt(150))
+	err := s.depositHandler.HandleEvents(s.destinationDomain, big.NewInt(80), big.NewInt(2432), big.NewInt(150))
 
 	s.Nil(err)
 	msgs, err := readFromChannel(s.msgChan)
