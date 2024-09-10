@@ -5,7 +5,7 @@ all: help
 ## license: Adds license header to missing files.
 license:
 	@echo "  >  \033[32mAdding license headers...\033[0m "
-	GO111MODULE=off go get -u github.com/google/addlicense
+	go get -u github.com/google/addlicense
 	addlicense -v -c "Sygma" -f ./scripts/header.txt -y 2023 -ignore ".idea/**"  .
 
 ## license-check: Checks for missing license headers
@@ -25,8 +25,13 @@ e2e-test:
 
 genmocks:
 	mockgen -source=./chains/evm/listener/handlers/stateRoot.go -destination=./mock/stateRoot.go -package mock
+	mockgen -source=./chains/evm/listener/handlers/deposit.go -destination=./mock/deposit.go -package mock
 	mockgen -source=./chains/evm/message/stateRoot.go -destination=./mock/stateRootMessage.go -package mock
 	mockgen -destination=./mock/store.go -package mock github.com/sygmaprotocol/sygma-core/store KeyValueReaderWriter
+	mockgen -source=./chains/evm/proof/receipt.go -destination=./mock/proof.go -package mock 
+	mockgen -destination=./mock/hashi.go -package mock github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/listener/handlers ReceiptProver,RootProver
+	mockgen -source=./chains/evm/proof/root.go -destination=./mock/root.go -package mock 
+
 
 
 
