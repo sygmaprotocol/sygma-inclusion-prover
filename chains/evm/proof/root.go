@@ -7,6 +7,7 @@ import (
 	"context"
 	"math/big"
 	"strconv"
+	"time"
 
 	"github.com/attestantio/go-eth2-client/api"
 	apiv1 "github.com/attestantio/go-eth2-client/api/v1"
@@ -14,6 +15,8 @@ import (
 	"github.com/attestantio/go-eth2-client/spec/deneb"
 	ssz "github.com/ferranbt/fastssz"
 	gnosisDeneb "github.com/mpetrun5/go-eth2-client/spec/deneb"
+	cache "github.com/patrickmn/go-cache"
+	"github.com/rs/zerolog/log"
 	"github.com/sygmaprotocol/sygma-inclusion-prover/chains/evm/config"
 )
 
@@ -50,12 +53,14 @@ type BeaconClient interface {
 type ReceiptRootProver struct {
 	beaconClient BeaconClient
 	spec         config.Spec
+	stateCache   *cache.Cache
 }
 
 func NewReceiptRootProver(beaconClient BeaconClient, spec config.Spec) *ReceiptRootProver {
 	return &ReceiptRootProver{
 		beaconClient: beaconClient,
 		spec:         spec,
+		stateCache:   cache.New(time.Minute*5, time.Minute*5),
 	}
 }
 
@@ -95,9 +100,7 @@ func (p *ReceiptRootProver) historicalRootProof(ctx context.Context, currentSlot
 		return nil, err
 	}
 
-	state, err := p.beaconClient.BeaconState(ctx, &api.BeaconStateOpts{
-		State: strconv.FormatUint(currentSlot.Uint64(), 10),
-	})
+	state, err := p.beaconState(ctx, currentSlot)
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +116,27 @@ func (p *ReceiptRootProver) historicalRootProof(ctx context.Context, currentSlot
 	}
 
 	return append(historicalRootProof.Hashes, stateProof.Hashes...), nil
+}
+
+func (p *ReceiptRootProver) beaconState(ctx context.Context, slot *big.Int) (*api.Response[*spec.VersionedBeaconState], error) {
+	cachedState, ok := p.stateCache.Get(slot.String())
+	if ok {
+		return cachedState.(*api.Response[*spec.VersionedBeaconState]), nil
+	}
+
+	state, err := p.beaconClient.BeaconState(ctx, &api.BeaconStateOpts{
+		State: strconv.FormatUint(slot.Uint64(), 10),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	err = p.stateCache.Add(slot.String(), state, cache.DefaultExpiration)
+	if err != nil {
+		log.Err(err).Msgf("Failed saving state to cache")
+	}
+
+	return state, nil
 }
 
 func (p *ReceiptRootProver) stateTree(state *deneb.BeaconState) (*ssz.Node, error) {
