@@ -43,38 +43,31 @@ type BlockStorer interface {
 	LatestBlock(sourceDomainID uint8, destinationDomainID uint8) (*big.Int, error)
 }
 
-type DepositHandler interface {
-	HandleDeposits(destination uint8, startBlock *big.Int, endBlock *big.Int, slot *big.Int) error
-}
-
-type HashiHandler interface {
-	HandleMessages(destination uint8, startBlock *big.Int, endBlock *big.Int, slot *big.Int) error
+type EventHandler interface {
+	HandleEvents(destination uint8, startBlock *big.Int, endBlock *big.Int, slot *big.Int) error
 }
 
 type StateRootHandler struct {
-	blockFetcher   BlockFetcher
-	blockStorer    BlockStorer
-	depositHandler DepositHandler
-	hashiHandler   HashiHandler
-	startBlock     *big.Int
-	domainID       uint8
+	blockFetcher  BlockFetcher
+	blockStorer   BlockStorer
+	eventHandlers []EventHandler
+	startBlock    *big.Int
+	domainID      uint8
 }
 
 func NewStateRootHandler(
 	domainID uint8,
-	depositHandler DepositHandler,
-	hashiHandler HashiHandler,
+	eventHandlers []EventHandler,
 	blockFetcher BlockFetcher,
 	blockStorer BlockStorer,
 	startBlock *big.Int,
 ) *StateRootHandler {
 	return &StateRootHandler{
-		blockFetcher:   blockFetcher,
-		blockStorer:    blockStorer,
-		domainID:       domainID,
-		startBlock:     startBlock,
-		depositHandler: depositHandler,
-		hashiHandler:   hashiHandler,
+		blockFetcher:  blockFetcher,
+		blockStorer:   blockStorer,
+		domainID:      domainID,
+		startBlock:    startBlock,
+		eventHandlers: eventHandlers,
 	}
 }
 
@@ -101,14 +94,11 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 	}
 	endBlock := big.NewInt(int64(block.Data.Deneb.Message.Body.ExecutionPayload.BlockNumber))
 
-	err = h.hashiHandler.HandleMessages(m.Source, new(big.Int).Set(startBlock), new(big.Int).Set(endBlock), stateRoot.Slot)
-	if err != nil {
-		return nil, err
-	}
-
-	err = h.depositHandler.HandleDeposits(m.Source, new(big.Int).Set(startBlock), new(big.Int).Set(endBlock), stateRoot.Slot)
-	if err != nil {
-		return nil, err
+	for _, h := range h.eventHandlers {
+		err = h.HandleEvents(m.Source, new(big.Int).Set(startBlock), new(big.Int).Set(endBlock), stateRoot.Slot)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	err = h.blockStorer.StoreBlock(h.domainID, m.Source, endBlock)

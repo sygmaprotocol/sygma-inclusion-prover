@@ -77,7 +77,7 @@ func NewDepositEventHandler(
 	}
 }
 
-func (h *DepositEventHandler) HandleDeposits(destination uint8, startBlock *big.Int, endBlock *big.Int, slot *big.Int) error {
+func (h *DepositEventHandler) HandleEvents(destination uint8, startBlock *big.Int, endBlock *big.Int, slot *big.Int) error {
 	deposits, err := h.fetchDeposits(destination, startBlock, endBlock)
 	if err != nil {
 		return err

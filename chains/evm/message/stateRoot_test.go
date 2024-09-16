@@ -28,8 +28,8 @@ type StateRootHandlerTestSuite struct {
 	msgChan            chan []*evmMessage.Message
 	mockBlockStorer    *mock.MockBlockStorer
 	mockBlockFetcher   *mock.MockBlockFetcher
-	mockDepositHandler *mock.MockDepositHandler
-	mockHashiHandler   *mock.MockHashiHandler
+	mockDepositHandler *mock.MockEventHandler
+	mockHashiHandler   *mock.MockEventHandler
 	sourceDomain       uint8
 }
 
@@ -41,14 +41,13 @@ func (s *StateRootHandlerTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	s.mockBlockFetcher = mock.NewMockBlockFetcher(ctrl)
 	s.mockBlockStorer = mock.NewMockBlockStorer(ctrl)
-	s.mockDepositHandler = mock.NewMockDepositHandler(ctrl)
-	s.mockHashiHandler = mock.NewMockHashiHandler(ctrl)
+	s.mockDepositHandler = mock.NewMockEventHandler(ctrl)
+	s.mockHashiHandler = mock.NewMockEventHandler(ctrl)
 	s.msgChan = make(chan []*evmMessage.Message, 10)
 	s.sourceDomain = 1
 	s.stateRootHandler = message.NewStateRootHandler(
 		s.sourceDomain,
-		s.mockDepositHandler,
-		s.mockHashiHandler,
+		[]message.EventHandler{s.mockDepositHandler, s.mockHashiHandler},
 		s.mockBlockFetcher,
 		s.mockBlockStorer,
 		big.NewInt(50),
@@ -87,8 +86,8 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_MissingStartBlock() {
 	s.mockBlockStorer.EXPECT().LatestBlock(s.sourceDomain, uint8(2)).Return(big.NewInt(0), nil)
 	s.mockBlockStorer.EXPECT().StoreBlock(s.sourceDomain, uint8(2), big.NewInt(100)).Return(nil)
 
-	s.mockDepositHandler.EXPECT().HandleDeposits(uint8(2), big.NewInt(50), big.NewInt(100), big.NewInt(1000)).Return(nil)
-	s.mockHashiHandler.EXPECT().HandleMessages(uint8(2), big.NewInt(50), big.NewInt(100), big.NewInt(1000)).Return(nil)
+	s.mockDepositHandler.EXPECT().HandleEvents(uint8(2), big.NewInt(50), big.NewInt(100), big.NewInt(1000)).Return(nil)
+	s.mockHashiHandler.EXPECT().HandleEvents(uint8(2), big.NewInt(50), big.NewInt(100), big.NewInt(1000)).Return(nil)
 
 	_, err := s.stateRootHandler.HandleMessage(message.NewEvmStateRootMessage(2, s.sourceDomain, message.StateRootData{
 		Slot: big.NewInt(1000),
@@ -117,8 +116,8 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_ExistingStartBlock() {
 	s.mockBlockStorer.EXPECT().LatestBlock(s.sourceDomain, uint8(2)).Return(big.NewInt(80), nil)
 	s.mockBlockStorer.EXPECT().StoreBlock(s.sourceDomain, uint8(2), big.NewInt(100)).Return(nil)
 
-	s.mockDepositHandler.EXPECT().HandleDeposits(uint8(2), big.NewInt(80), big.NewInt(100), big.NewInt(1000)).Return(nil)
-	s.mockHashiHandler.EXPECT().HandleMessages(uint8(2), big.NewInt(80), big.NewInt(100), big.NewInt(1000)).Return(nil)
+	s.mockDepositHandler.EXPECT().HandleEvents(uint8(2), big.NewInt(80), big.NewInt(100), big.NewInt(1000)).Return(nil)
+	s.mockHashiHandler.EXPECT().HandleEvents(uint8(2), big.NewInt(80), big.NewInt(100), big.NewInt(1000)).Return(nil)
 
 	_, err := s.stateRootHandler.HandleMessage(message.NewEvmStateRootMessage(2, s.sourceDomain, message.StateRootData{
 		Slot: big.NewInt(1000),
