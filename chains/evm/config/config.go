@@ -24,10 +24,10 @@ type EVMConfig struct {
 	Executor              string
 	Hashi                 string
 	Yaho                  string
+	StateRootAddresses    []string `split_words:"true"`
 	MaxGasPrice           int64    `default:"500000000000" split_words:"true"`
 	GasMultiplier         float64  `default:"1" split_words:"true"`
 	GasIncreasePercentage int64    `default:"15" split_words:"true"`
-	StateRootAddresses    []string `required:"true" split_words:"true"`
 	SlotIndex             uint8    `required:"true" split_words:"true"`
 	BlockConfirmations    int64    `default:"1" split_words:"true"`
 	BlockInterval         int64    `default:"5" split_words:"true"`
