@@ -4,14 +4,14 @@
 name: Sygma Inclusion Prover
 
 on:
-  release:
-    types:
-      - published
+  push:
+    branches:
+      - main
       
 env:
   ENVIRONMENT: 'TESTNET'
   REGISTRY: 'ghcr.io'
-  TAG: ${{ github.event.release.tag_name }}
+  TAG: 'latest'
   AWS_TESTNET: '${{ secrets.AWS_ARN }}'
 
 jobs:
@@ -44,7 +44,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.TAG }}
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}:${{ env.TAG }},${{ env.REGISTRY }}/${{ github.repository }}:${{ github.ref_name }}
 
       - name: slack notify
         uses: 8398a7/action-slack@v3
@@ -82,7 +82,7 @@ jobs:
             awsAccountId=${{ env.AWS_TESTNET }}
             awsRegion=${{ secrets.AWS_REGION }}
             awsEfs=${{ secrets.INCLUSION_EFS_TESTNET }}
-            imageTag=${{ env.Tag }}
+            imageTag=${{ github.ref_name }}
 
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
