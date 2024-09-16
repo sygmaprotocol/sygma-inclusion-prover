@@ -11,7 +11,7 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/rs/zerolog v1.32.0
 	github.com/stretchr/testify v1.9.0
-	github.com/sygmaprotocol/sygma-core v0.0.0-20240213143226-6c21c763eefc
+	github.com/sygmaprotocol/sygma-core v0.0.0-20240916115618-aa7e4ebefb51
 	github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a
 	go.uber.org/mock v0.4.0
 )

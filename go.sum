@@ -400,8 +400,8 @@ github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsT
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
 github.com/supranational/blst v0.3.11 h1:LyU6FolezeWAhvQk0k6O/d49jqgO52MSDDfYgbeoEm4=
 github.com/supranational/blst v0.3.11/go.mod h1:jZJtfjgudtNl4en1tzwPIV3KjUnQUvG3/j+w+fVonLw=
-github.com/sygmaprotocol/sygma-core v0.0.0-20240213143226-6c21c763eefc h1:5bNBI/zcWltHDFsiY5ykWWXPSDhw1qVazD71s9b+V3s=
-github.com/sygmaprotocol/sygma-core v0.0.0-20240213143226-6c21c763eefc/go.mod h1:b4RZCyYr20Mp4WAAj4TkC6gU2KZ0ZWcpSGmKc6n8NKc=
+github.com/sygmaprotocol/sygma-core v0.0.0-20240916115618-aa7e4ebefb51 h1:6JyEFnvR5MCyVV3aB2Qtpr/mEm4p2N32PmytBJE5z9M=
+github.com/sygmaprotocol/sygma-core v0.0.0-20240916115618-aa7e4ebefb51/go.mod h1:b4RZCyYr20Mp4WAAj4TkC6gU2KZ0ZWcpSGmKc6n8NKc=
 github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a h1:1ur3QoCqvE5fl+nylMaIr9PVV1w343YRDtsy+Rwu7XI=
 github.com/syndtr/goleveldb v1.0.1-0.20220614013038-64ee5596c38a/go.mod h1:RRCYJbIwD5jmqPI9XoAFR0OcDxqUctll6zUj/+B4S48=
 github.com/tklauser/go-sysconf v0.3.13 h1:GBUpcahXSpR2xN01jhkNAbTLRk2Yzgggk8IM08lq3r4=
