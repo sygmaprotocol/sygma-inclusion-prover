@@ -92,8 +92,24 @@ func main() {
 					panic(err)
 				}
 
+				startBlock, err := blockStore.GetStartBlock(
+					id,
+					new(big.Int).SetUint64(config.StartBlock),
+					config.Latest,
+					config.FreshStart,
+				)
+				if err != nil {
+					panic(err)
+				}
+				if startBlock == nil {
+					latestBlock, err := client.LatestBlock()
+					if err != nil {
+						panic(err)
+					}
+					startBlock = latestBlock
+				}
+
 				var evmListener *listener.EVMListener
-				var startBlock *big.Int
 				if len(config.StateRootAddresses) > 0 {
 					eventHandlers := []listener.EventHandler{}
 					for _, stateRootAddress := range config.StateRootAddresses {
@@ -108,23 +124,6 @@ func main() {
 						time.Duration(config.BlockRetryInterval)*time.Second,
 						big.NewInt(config.BlockConfirmations),
 						big.NewInt(config.BlockInterval))
-
-					startBlock, err = blockStore.GetStartBlock(
-						id,
-						new(big.Int).SetUint64(config.StartBlock),
-						config.Latest,
-						config.FreshStart,
-					)
-					if err != nil {
-						panic(err)
-					}
-					if startBlock == nil {
-						latestBlock, err := client.LatestBlock()
-						if err != nil {
-							panic(err)
-						}
-						startBlock = latestBlock
-					}
 				}
 
 				messageHandler := message.NewMessageHandler()
