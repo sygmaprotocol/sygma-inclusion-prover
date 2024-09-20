@@ -31,7 +31,7 @@ jobs:
     steps:
       - name: Authorised User only
         run: |
-          if [[ ! " mpetrunic MakMuftic eedygreen " =~ " ${{ github.actor }} " ]]; then 
+          if [[ ! " mpetrun5 MakMuftic eedygreen " =~ " ${{ github.actor }} " ]]; then 
             echo "You are not authorized to deploy to mainnet."
             exit 1
           fi
