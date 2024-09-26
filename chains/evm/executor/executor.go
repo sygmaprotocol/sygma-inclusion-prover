@@ -17,6 +17,7 @@ import (
 )
 
 const TRANSFER_GAS_COST = 600000
+const HASHI_GAS_COST = 3000000
 
 type Batch struct {
 	proposals []contracts.ExecutorProposal
@@ -78,7 +79,9 @@ func (e *EVMExecutor) storeMessage(props []*proposal.Proposal) error {
 		data.ReceiptProof,
 		data.TxIndexRLPEncoded,
 		data.LogIndex,
-		transactor.TransactOptions{},
+		transactor.TransactOptions{
+			GasLimit: HASHI_GAS_COST,
+		},
 	)
 	if err != nil {
 		return err
