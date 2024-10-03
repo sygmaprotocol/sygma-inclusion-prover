@@ -89,15 +89,15 @@ func (h *DepositEventHandler) HandleEvents(destination uint8, startBlock *big.In
 			return err
 		}
 
-		h.log.Debug().Uint8("destination", d.DestinationDomainID).Msg("Sending transfer message")
-
+		msgID := fmt.Sprintf("%d-%d-%d-%d", slot, h.domainID, d.DestinationDomainID, d.DepositNonce)
+		h.log.Debug().Str("messageID", msgID).Uint8("destination", d.DestinationDomainID).Msg("Sending transfer message")
 		msgs[d.DestinationDomainID] = append(msgs[d.DestinationDomainID], evmMessage.NewEVMTransferMessage(h.domainID, d.DestinationDomainID, evmMessage.TransferData{
 			Deposit:      d,
 			Slot:         slot,
 			AccountProof: accountProof,
 			StorageProof: storageProof,
 			Type:         h.transferType(d),
-		}))
+		}, msgID))
 	}
 	if len(msgs) == 0 {
 		log.Debug().Msgf("No deposits found for block range %s-%s", startBlock, endBlock)

@@ -6,6 +6,7 @@ package handlers
 import (
 	"context"
 	"encoding/hex"
+	"fmt"
 	"math/big"
 	"strings"
 
@@ -62,7 +63,7 @@ func (h *StateRootEventHandler) HandleEvents(startBlock *big.Int, endBlock *big.
 		h.msgChan <- []*message.Message{evmMessage.NewEvmStateRootMessage(h.domainID, sr.SourceDomainID, evmMessage.StateRootData{
 			StateRoot: sr.StateRoot,
 			Slot:      sr.Slot,
-		})}
+		}, fmt.Sprintf("%d-%s", sr.Slot, hex.EncodeToString(sr.StateRoot[:])))}
 	}
 	return nil
 }
@@ -80,7 +81,7 @@ func (h *StateRootEventHandler) fetchStateRoots(startBlock *big.Int, endBlock *b
 			log.Error().Msgf("Failed unpacking state root event log: %v", err)
 			continue
 		}
-		log.Debug().Uint8("domainID", h.domainID).Uint8("sourceDomainID", sr.SourceDomainID).Msgf(
+		log.Debug().Str("messageID", fmt.Sprintf("%d-%s", sr.Slot, hex.EncodeToString(sr.StateRoot[:]))).Uint8("domainID", h.domainID).Uint8("sourceDomainID", sr.SourceDomainID).Msgf(
 			"Found state root %s in block: %d", hex.EncodeToString(sr.StateRoot[:]), l.BlockNumber)
 		stateRoots = append(stateRoots, sr)
 	}
