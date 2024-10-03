@@ -61,7 +61,7 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_InvalidBlock() {
 
 	_, err := s.stateRootHandler.HandleMessage(message.NewEvmStateRootMessage(2, s.sourceDomain, message.StateRootData{
 		Slot: big.NewInt(10),
-	}))
+	}, "id"))
 
 	s.NotNil(err)
 }
@@ -91,7 +91,7 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_MissingStartBlock() {
 
 	_, err := s.stateRootHandler.HandleMessage(message.NewEvmStateRootMessage(2, s.sourceDomain, message.StateRootData{
 		Slot: big.NewInt(1000),
-	}))
+	}, "id"))
 
 	s.Nil(err)
 }
@@ -121,7 +121,7 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_ExistingStartBlock() {
 
 	_, err := s.stateRootHandler.HandleMessage(message.NewEvmStateRootMessage(2, s.sourceDomain, message.StateRootData{
 		Slot: big.NewInt(1000),
-	}))
+	}, "id"))
 
 	s.Nil(err)
 }

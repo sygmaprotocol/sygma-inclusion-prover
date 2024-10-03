@@ -29,11 +29,12 @@ type TransferData struct {
 	Type         TransferType
 }
 
-func NewEVMTransferMessage(source uint8, destination uint8, transfer TransferData) *message.Message {
+func NewEVMTransferMessage(source uint8, destination uint8, transfer TransferData, messageID string) *message.Message {
 	return &message.Message{
 		Source:      source,
 		Destination: destination,
 		Data:        transfer,
+		ID:          messageID,
 		Type:        EVMTransferMessage,
 	}
 }

@@ -25,12 +25,13 @@ type StateRootData struct {
 	Slot      *big.Int
 }
 
-func NewEvmStateRootMessage(source uint8, destination uint8, stateRoot StateRootData) *message.Message {
+func NewEvmStateRootMessage(source uint8, destination uint8, stateRoot StateRootData, messageID string) *message.Message {
 	return &message.Message{
 		Source:      source,
 		Destination: destination,
 		Data:        stateRoot,
 		Type:        EVMStateRootMessage,
+		ID:          messageID,
 	}
 }
 
@@ -78,7 +79,7 @@ func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal
 	log.Debug().Uint8(
 		"domainID", m.Destination).Str(
 		"stateRoot", hex.EncodeToString(stateRoot.StateRoot[:]),
-	).Msgf("Received state root message from domain %d", m.Source)
+	).Str("messageID", m.ID).Msgf("Received state root message from domain %d", m.Source)
 	block, err := h.blockFetcher.SignedBeaconBlock(context.Background(), &api.SignedBeaconBlockOpts{
 		Block: stateRoot.Slot.String(),
 	})

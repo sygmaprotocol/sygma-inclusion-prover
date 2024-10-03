@@ -111,13 +111,13 @@ func (s *StateRootHandlerTestSuite) Test_HandleEvents_ValidRoots() {
 	s.Equal(msg, []*message.Message{evmMessage.NewEvmStateRootMessage(s.sourceDomain, 1, evmMessage.StateRootData{
 		StateRoot: util.SliceTo32Bytes(expectedStateRoot),
 		Slot:      big.NewInt(987232),
-	})})
+	}, msg[0].ID)})
 	msg, err = readFromChannel(s.msgChan)
 	s.Nil(err)
 	s.Equal(msg, []*message.Message{evmMessage.NewEvmStateRootMessage(s.sourceDomain, 1, evmMessage.StateRootData{
 		StateRoot: util.SliceTo32Bytes(expectedStateRoot),
 		Slot:      big.NewInt(987232),
-	})})
+	}, msg[0].ID)})
 	_, err = readFromChannel(s.msgChan)
 	s.NotNil(err)
 }

@@ -25,12 +25,13 @@ type HashiData struct {
 	LogIndex          *big.Int
 }
 
-func NewHashiMessage(source uint8, destination uint8, data HashiData) *message.Message {
+func NewHashiMessage(source uint8, destination uint8, data HashiData, messageID string) *message.Message {
 	return &message.Message{
 		Source:      source,
 		Destination: destination,
 		Data:        data,
 		Type:        HashiMessage,
+		ID:          messageID,
 	}
 }
 
