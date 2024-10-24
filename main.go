@@ -140,8 +140,19 @@ func main() {
 						panic(err)
 					}
 					beaconProvider := beaconClient.(*http.Service)
+
+					archiveBeaconClinet, err := http.New(ctx,
+						http.WithAddress(config.ArchiveBeaconEndpoint),
+						http.WithLogLevel(logLevel),
+						http.WithTimeout(time.Minute*30),
+						http.WithEnforceJSON(false),
+					)
+					if err != nil {
+						panic(err)
+					}
+					archiveBeaconProvider := archiveBeaconClinet.(*http.Service)
 					receiptProver := proof.NewReceiptProver(client)
-					rootProver := proof.NewReceiptRootProver(beaconProvider, config.Spec)
+					rootProver := proof.NewReceiptRootProver(beaconProvider, archiveBeaconProvider, config.Spec)
 
 					stateRootEventHandlers := make([]evmMessage.EventHandler, 0)
 					if config.Yaho != "" {

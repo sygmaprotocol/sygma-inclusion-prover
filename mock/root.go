@@ -18,6 +18,44 @@ import (
 	gomock "go.uber.org/mock/gomock"
 )
 
+// MockBeaconStateFetcher is a mock of BeaconStateFetcher interface.
+type MockBeaconStateFetcher struct {
+	ctrl     *gomock.Controller
+	recorder *MockBeaconStateFetcherMockRecorder
+}
+
+// MockBeaconStateFetcherMockRecorder is the mock recorder for MockBeaconStateFetcher.
+type MockBeaconStateFetcherMockRecorder struct {
+	mock *MockBeaconStateFetcher
+}
+
+// NewMockBeaconStateFetcher creates a new mock instance.
+func NewMockBeaconStateFetcher(ctrl *gomock.Controller) *MockBeaconStateFetcher {
+	mock := &MockBeaconStateFetcher{ctrl: ctrl}
+	mock.recorder = &MockBeaconStateFetcherMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockBeaconStateFetcher) EXPECT() *MockBeaconStateFetcherMockRecorder {
+	return m.recorder
+}
+
+// BeaconState mocks base method.
+func (m *MockBeaconStateFetcher) BeaconState(ctx context.Context, opts *api.BeaconStateOpts) (*api.Response[*spec.VersionedBeaconState], error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BeaconState", ctx, opts)
+	ret0, _ := ret[0].(*api.Response[*spec.VersionedBeaconState])
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// BeaconState indicates an expected call of BeaconState.
+func (mr *MockBeaconStateFetcherMockRecorder) BeaconState(ctx, opts any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeaconState", reflect.TypeOf((*MockBeaconStateFetcher)(nil).BeaconState), ctx, opts)
+}
+
 // MockBeaconClient is a mock of BeaconClient interface.
 type MockBeaconClient struct {
 	ctrl     *gomock.Controller
@@ -54,21 +92,6 @@ func (m *MockBeaconClient) BeaconBlockHeader(ctx context.Context, opts *api.Beac
 func (mr *MockBeaconClientMockRecorder) BeaconBlockHeader(ctx, opts any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeaconBlockHeader", reflect.TypeOf((*MockBeaconClient)(nil).BeaconBlockHeader), ctx, opts)
-}
-
-// BeaconState mocks base method.
-func (m *MockBeaconClient) BeaconState(ctx context.Context, opts *api.BeaconStateOpts) (*api.Response[*spec.VersionedBeaconState], error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "BeaconState", ctx, opts)
-	ret0, _ := ret[0].(*api.Response[*spec.VersionedBeaconState])
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// BeaconState indicates an expected call of BeaconState.
-func (mr *MockBeaconClientMockRecorder) BeaconState(ctx, opts any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BeaconState", reflect.TypeOf((*MockBeaconClient)(nil).BeaconState), ctx, opts)
 }
 
 // SignedBeaconBlock mocks base method.
