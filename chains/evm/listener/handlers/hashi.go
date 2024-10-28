@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
-	"sync"
 
 	"github.com/attestantio/go-eth2-client/api"
 	apiv1 "github.com/attestantio/go-eth2-client/api/v1"
@@ -54,7 +53,6 @@ type HashiEventHandler struct {
 	beaconClient  BeaconClient
 	client        Client
 	chainIDS      map[uint8]uint64
-	lock          sync.Mutex
 }
 
 func NewHashiEventHandler(
@@ -78,14 +76,10 @@ func NewHashiEventHandler(
 		rootProver:    rootProver,
 		chainIDS:      chainIDS,
 		msgChan:       msgChan,
-		lock:          sync.Mutex{},
 	}
 }
 
 func (h *HashiEventHandler) HandleEvents(destination uint8, startBlock *big.Int, endBlock *big.Int, slot *big.Int) error {
-	h.lock.Lock()
-	defer h.lock.Unlock()
-
 	logs, err := h.fetchMessages(startBlock, endBlock)
 	if err != nil {
 		return err

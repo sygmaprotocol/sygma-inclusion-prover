@@ -10,7 +10,6 @@ import (
 	"math/big"
 	"slices"
 	"strings"
-	"sync"
 
 	ethereumABI "github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
@@ -56,7 +55,6 @@ type DepositEventHandler struct {
 	slotIndex        uint8
 	genericResources []string
 	msgChan          chan []*message.Message
-	lock             sync.Mutex
 }
 
 func NewDepositEventHandler(
@@ -76,14 +74,10 @@ func NewDepositEventHandler(
 		genericResources: genericResources,
 		msgChan:          msgChan,
 		domainID:         domainID,
-		lock:             sync.Mutex{},
 	}
 }
 
 func (h *DepositEventHandler) HandleEvents(destination uint8, startBlock *big.Int, endBlock *big.Int, slot *big.Int) error {
-	h.lock.Lock()
-	defer h.lock.Unlock()
-
 	deposits, err := h.fetchDeposits(destination, startBlock, endBlock)
 	if err != nil {
 		return err
