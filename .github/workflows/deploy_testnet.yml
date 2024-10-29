@@ -7,18 +7,19 @@ on:
   push:
     branches:
       - main
-      
+
+run-name: Deploy Inclusion-Prover to Testnet - ${{ inputs.release_tag }} by @${{ github.actor }}
+
 env:
   ENVIRONMENT: 'TESTNET'
   REGISTRY: 'ghcr.io'
   TAG: 'latest'
-  AWS_TESTNET: '${{ secrets.AWS_ARN }}'
+
 
 jobs:
   push:
     name: push
     runs-on: ubuntu-latest
-
     permissions:
       contents: read
       id-token: write
@@ -60,11 +61,13 @@ jobs:
     needs: push
     name: deploy
     runs-on: ubuntu-latest
-
+    environment: testnet
     permissions:
       contents: read
       id-token: write
-
+    env: 
+      AWS_TESTNET: '${{ secrets.AWS_TESTNET }}'
+      AWS_REGION: '${{ secrets.AWS_REGION }}'
     steps:
       - name: checkout ecs repo
         uses: actions/checkout@v4
@@ -80,15 +83,15 @@ jobs:
           data_format: json
           variables: |
             awsAccountId=${{ env.AWS_TESTNET }}
-            awsRegion=${{ secrets.AWS_REGION }}
-            awsEfs=${{ secrets.INCLUSION_EFS_TESTNET }}
+            awsRegion=${{ env.AWS_REGION }}
+            awsEfs=${{ secrets.INCLUSION_EFS }}
             imageTag=${{ github.ref_name }}
 
       - name: configure aws credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ env.AWS_TESTNET }}:role/github-actions-${{ env.ENVIRONMENT }}-chainbridge
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
           role-session-name: GithubActions
 
       - name: deploy task definition
