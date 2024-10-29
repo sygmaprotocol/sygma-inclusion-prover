@@ -24,8 +24,9 @@ import (
 type ReceiptRootProofTestSuite struct {
 	suite.Suite
 
-	prover           *proof.ReceiptRootProver
-	mockBeaconClient *mock.MockBeaconClient
+	prover                  *proof.ReceiptRootProver
+	mockBeaconClient        *mock.MockBeaconClient
+	mockArchiveBeaconClient *mock.MockBeaconStateFetcher
 }
 
 func TestRunReceiptRootProofTestSuite(t *testing.T) {
@@ -35,6 +36,7 @@ func TestRunReceiptRootProofTestSuite(t *testing.T) {
 func (s *ReceiptRootProofTestSuite) SetupTest() {
 	ctrl := gomock.NewController(s.T())
 	s.mockBeaconClient = mock.NewMockBeaconClient(ctrl)
+	s.mockArchiveBeaconClient = mock.NewMockBeaconStateFetcher(ctrl)
 
 	beaconState := &spec.VersionedBeaconState{
 		Deneb: &deneb.BeaconState{},
@@ -44,7 +46,7 @@ func (s *ReceiptRootProofTestSuite) SetupTest() {
 		panic(err)
 	}
 	_ = beaconState.Deneb.UnmarshalJSON(beaconBytes)
-	s.mockBeaconClient.EXPECT().BeaconState(gomock.Any(), gomock.Any()).Return(&api.Response[*spec.VersionedBeaconState]{
+	s.mockArchiveBeaconClient.EXPECT().BeaconState(gomock.Any(), gomock.Any()).Return(&api.Response[*spec.VersionedBeaconState]{
 		Data: beaconState,
 	}, nil).AnyTimes()
 
@@ -70,7 +72,7 @@ func (s *ReceiptRootProofTestSuite) SetupTest() {
 		Data: beaconBlockHeader,
 	}, nil).AnyTimes()
 
-	s.prover = proof.NewReceiptRootProver(s.mockBeaconClient, config.MainnetSpec)
+	s.prover = proof.NewReceiptRootProver(s.mockBeaconClient, s.mockArchiveBeaconClient, config.MainnetSpec)
 }
 
 func (s *ReceiptRootProofTestSuite) Test_ReceiptRootProof_SlotDifferent() {

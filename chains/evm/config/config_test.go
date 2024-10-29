@@ -89,6 +89,7 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_YAHO", "yaho")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_HASHI", "hashi")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_BEACON_ENDPOINT", "endpoint")
+	os.Setenv("INCLUSION_PROVER_DOMAINS_1_ARCHIVE_BEACON_ENDPOINT", "archive")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_MAX_GAS_PRICE", "1000")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_BLOCK_INTERVAL", "10")
 	os.Setenv("INCLUSION_PROVER_DOMAINS_1_BLOCK_RETRY_INTERVAL", "10")
@@ -118,6 +119,7 @@ func (s *EVMConfigTestSuite) Test_LoadEVMConfig_SuccessfulLoad() {
 		GasIncreasePercentage: 20,
 		MaxGasPrice:           1000,
 		BeaconEndpoint:        "endpoint",
+		ArchiveBeaconEndpoint: "archive",
 		StateRootAddresses:    []string{"0x1", "0x2"},
 		SlotIndex:             1,
 		BlockConfirmations:    15,

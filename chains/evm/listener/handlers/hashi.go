@@ -95,6 +95,7 @@ func (h *HashiEventHandler) HandleEvents(destination uint8, startBlock *big.Int,
 			continue
 		}
 
+		log.Info().Str("messageID", msg.ID).Msgf("Found hashi message log in block: %d, TxHash: %s, %+v", l.BlockNumber, l.TxHash, msg)
 		msgs = append(msgs, msg)
 	}
 
@@ -160,7 +161,7 @@ func (h *HashiEventHandler) handleMessage(l types.Log, destination uint8, slot *
 		ReceiptRoot:       block.ReceiptHash(),
 		TxIndexRLPEncoded: txIndexRLP,
 		LogIndex:          h.logIndex(receipt, l),
-	}), nil
+	}, fmt.Sprintf("%s-%d", l.TxHash, h.logIndex(receipt, l))), nil
 }
 
 func (h *HashiEventHandler) slotChild(slot *big.Int) (*big.Int, error) {

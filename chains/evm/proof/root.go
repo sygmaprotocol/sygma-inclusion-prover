@@ -27,19 +27,22 @@ const (
 	SLOTS_PER_HISTORICAL_LIMIT       = 8192
 )
 
+type BeaconStateFetcher interface {
+	BeaconState(
+		ctx context.Context,
+		opts *api.BeaconStateOpts,
+	) (
+		*api.Response[*spec.VersionedBeaconState],
+		error,
+	)
+}
+
 type BeaconClient interface {
 	BeaconBlockHeader(
 		ctx context.Context,
 		opts *api.BeaconBlockHeaderOpts,
 	) (
 		*api.Response[*apiv1.BeaconBlockHeader],
-		error,
-	)
-	BeaconState(
-		ctx context.Context,
-		opts *api.BeaconStateOpts,
-	) (
-		*api.Response[*spec.VersionedBeaconState],
 		error,
 	)
 	SignedBeaconBlock(ctx context.Context,
@@ -51,16 +54,18 @@ type BeaconClient interface {
 }
 
 type ReceiptRootProver struct {
-	beaconClient BeaconClient
-	spec         config.Spec
-	stateCache   *cache.Cache
+	beaconClient       BeaconClient
+	beaconStateFetcher BeaconStateFetcher
+	spec               config.Spec
+	stateCache         *cache.Cache
 }
 
-func NewReceiptRootProver(beaconClient BeaconClient, spec config.Spec) *ReceiptRootProver {
+func NewReceiptRootProver(beaconClient BeaconClient, beaconStateFetcher BeaconStateFetcher, spec config.Spec) *ReceiptRootProver {
 	return &ReceiptRootProver{
-		beaconClient: beaconClient,
-		spec:         spec,
-		stateCache:   cache.New(time.Minute*5, time.Minute*5),
+		beaconClient:       beaconClient,
+		beaconStateFetcher: beaconStateFetcher,
+		spec:               spec,
+		stateCache:         cache.New(time.Minute*5, time.Minute*5),
 	}
 }
 
@@ -124,7 +129,7 @@ func (p *ReceiptRootProver) beaconState(ctx context.Context, slot *big.Int) (*ap
 		return cachedState.(*api.Response[*spec.VersionedBeaconState]), nil
 	}
 
-	state, err := p.beaconClient.BeaconState(ctx, &api.BeaconStateOpts{
+	state, err := p.beaconStateFetcher.BeaconState(ctx, &api.BeaconStateOpts{
 		State: strconv.FormatUint(slot.Uint64(), 10),
 	})
 	if err != nil {

@@ -20,6 +20,7 @@ const (
 type EVMConfig struct {
 	config.BaseNetworkConfig
 	BeaconEndpoint        string `split_words:"true"`
+	ArchiveBeaconEndpoint string `split_words:"true"`
 	Router                string
 	Executor              string
 	Hashi                 string

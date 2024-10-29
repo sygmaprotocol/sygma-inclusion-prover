@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/hex"
 	"math/big"
+	"sync"
 
 	"github.com/attestantio/go-eth2-client/api"
 	"github.com/attestantio/go-eth2-client/spec"
@@ -25,12 +26,13 @@ type StateRootData struct {
 	Slot      *big.Int
 }
 
-func NewEvmStateRootMessage(source uint8, destination uint8, stateRoot StateRootData) *message.Message {
+func NewEvmStateRootMessage(source uint8, destination uint8, stateRoot StateRootData, messageID string) *message.Message {
 	return &message.Message{
 		Source:      source,
 		Destination: destination,
 		Data:        stateRoot,
 		Type:        EVMStateRootMessage,
+		ID:          messageID,
 	}
 }
 
@@ -53,6 +55,7 @@ type StateRootHandler struct {
 	eventHandlers []EventHandler
 	startBlock    *big.Int
 	domainID      uint8
+	lock          sync.Mutex
 }
 
 func NewStateRootHandler(
@@ -68,17 +71,21 @@ func NewStateRootHandler(
 		domainID:      domainID,
 		startBlock:    startBlock,
 		eventHandlers: eventHandlers,
+		lock:          sync.Mutex{},
 	}
 }
 
 // HandleMessage fetches deposits for the given state root and submits a transfer message
 // with execution state proofs per transfer
 func (h *StateRootHandler) HandleMessage(m *message.Message) (*proposal.Proposal, error) {
+	h.lock.Lock()
+	defer h.lock.Unlock()
+
 	stateRoot := m.Data.(StateRootData)
 	log.Debug().Uint8(
 		"domainID", m.Destination).Str(
 		"stateRoot", hex.EncodeToString(stateRoot.StateRoot[:]),
-	).Msgf("Received state root message from domain %d", m.Source)
+	).Str("messageID", m.ID).Msgf("Received state root message from domain %d", m.Source)
 	block, err := h.blockFetcher.SignedBeaconBlock(context.Background(), &api.SignedBeaconBlockOpts{
 		Block: stateRoot.Slot.String(),
 	})

@@ -87,7 +87,7 @@ func (e *EVMExecutor) storeMessage(props []*proposal.Proposal) error {
 		return err
 	}
 
-	log.Info().Uint8("domainID", e.domainID).Msgf("Sent hashi message execution with hash: %s", hash)
+	log.Info().Str("messageID", props[0].MessageID).Uint8("domainID", e.domainID).Msgf("Sent hashi message execution with hash: %s", hash)
 	return nil
 }
 
@@ -112,7 +112,7 @@ func (e *EVMExecutor) transfer(props []*proposal.Proposal) error {
 			continue
 		}
 
-		log.Info().Uint8("domainID", e.domainID).Msgf("Sent proposals execution with hash: %s", hash)
+		log.Info().Str("messageID", props[0].MessageID).Uint8("domainID", e.domainID).Msgf("Sent proposals execution with hash: %s", hash)
 	}
 	return nil
 }
