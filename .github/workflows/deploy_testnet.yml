@@ -20,6 +20,7 @@ jobs:
   push:
     name: push
     runs-on: ubuntu-latest
+    environment: testnet
     permissions:
       contents: read
       id-token: write
