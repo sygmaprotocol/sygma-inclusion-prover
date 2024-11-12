@@ -173,7 +173,7 @@ func (h *HashiEventHandler) slotChild(slot *big.Int) (*big.Int, error) {
 		})
 		if err != nil {
 			// slot is missing and the child slot is the next one
-			if strings.Contains(err.Error(), "Not Found") {
+			if strings.Contains(err.Error(), "404") {
 				tries++
 				childSlot = new(big.Int).Add(childSlot, big.NewInt(1))
 				continue
