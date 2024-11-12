@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.1.0](https://github.com/sygmaprotocol/sygma-inclusion-prover/compare/v1.0.3...v1.1.0) (2024-11-12)
+
+
+### Features
+
+* separate archive and standard beacon clients ([#44](https://github.com/sygmaprotocol/sygma-inclusion-prover/issues/44)) ([88a4e0d](https://github.com/sygmaprotocol/sygma-inclusion-prover/commit/88a4e0d8112b1ebe74a70be2f8c06a6b94150e5b))
+
+
+### Bug Fixes
+
+* replace beacon library with custom one that default to deneb ([#48](https://github.com/sygmaprotocol/sygma-inclusion-prover/issues/48)) ([cf5053d](https://github.com/sygmaprotocol/sygma-inclusion-prover/commit/cf5053d886a676e334befaa7de761cd9fb064cf7))
+* set lock on state root handling directly ([#46](https://github.com/sygmaprotocol/sygma-inclusion-prover/issues/46)) ([900d470](https://github.com/sygmaprotocol/sygma-inclusion-prover/commit/900d47000c9a3c3b4dd07cb602bc4edc95f5f14b))
+* slot finding error ([#50](https://github.com/sygmaprotocol/sygma-inclusion-prover/issues/50)) ([b88961a](https://github.com/sygmaprotocol/sygma-inclusion-prover/commit/b88961a89c393734c52ce61839a6d93e06c35bb7))
+
+
+### Miscellaneous
+
+* Access Secrets based on segregated environments  ([#47](https://github.com/sygmaprotocol/sygma-inclusion-prover/issues/47)) ([23d9da4](https://github.com/sygmaprotocol/sygma-inclusion-prover/commit/23d9da488a16a9e2955980384941852a2529f270))
+* add environment to testnet docker push ([#49](https://github.com/sygmaprotocol/sygma-inclusion-prover/issues/49)) ([618c07e](https://github.com/sygmaprotocol/sygma-inclusion-prover/commit/618c07e5e295b60dc624d9c93d0db61c99591441))
+
 ## [1.0.3](https://github.com/sygmaprotocol/sygma-inclusion-prover/compare/v1.0.2...v1.0.3) (2024-06-07)
 
 
